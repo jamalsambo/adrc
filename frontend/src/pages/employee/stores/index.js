@@ -45,6 +45,7 @@ export const useEmployeeStore = defineStore('employee', {
       return data;
     },
         async removeZones(params) {
+          console.log(params)
       const { data, error } = await api.delete("/employees/remove-zones", {
         ...params,
       });

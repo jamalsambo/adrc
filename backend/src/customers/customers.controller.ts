@@ -48,6 +48,12 @@ export class CustomersController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  remove(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.customersService.remove(id)
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('add-watermeter')
   async addWatermeter(@Body() dto: CreateCustomerHasWatermeterDto) {
     return this.customersService.addWatermeter(dto);

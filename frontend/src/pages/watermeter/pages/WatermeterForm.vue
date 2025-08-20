@@ -76,6 +76,8 @@ async function handleSubmit() {
     } else {
       await watermeterStore.create({
         ...form,
+        lantitude: 123,
+        longitude: 123,
         createdBy: auth.user.sub,
       });
       notifySuccess("Hidrômetro registado com sucesso");

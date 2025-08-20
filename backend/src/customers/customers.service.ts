@@ -50,6 +50,11 @@ export class CustomersService {
     return await this.customerRepository.save(customer);
   }
 
+  async remove(id: string): Promise<void> {
+    await this.customerRepository.delete({id})
+  }
+
+
   async addWatermeter(dto: CreateCustomerHasWatermeterDto) {
     const exists = await this.customerHasWatermeterRepo.findOneBy({
       customerId: dto.customerId,
