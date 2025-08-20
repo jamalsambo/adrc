@@ -40,9 +40,6 @@ export class EmployeeEntity {
   @Column({ name: 'user_id', type: 'uuid', nullable: true })
   userId?: string;
 
-  @Column({ name: 'position_id', type: 'uuid', nullable: true })
-  positionId: string;
-
   @CreateDateColumn({ name: 'createdAt' })
   createdAt: Date;
 

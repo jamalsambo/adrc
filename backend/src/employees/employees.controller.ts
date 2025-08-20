@@ -39,6 +39,7 @@ export class EmployeesController {
 
   @Delete('remove-zones')
   async removeZones(@Body() dto: RemoveZonesFromEmployeeDto) {
+    console.log(dto)
     return this.employeesService.removeZonesFromEmployee(dto);
   }
 
@@ -59,4 +60,9 @@ export class EmployeesController {
   ) {
     return this.employeesService.update(id, updateEmployeeDto);
   }
+
+    @Delete(':id')
+    remove(@Param('id', new ParseUUIDPipe()) id: string) {
+      this.employeesService.remove(id)
+    }
 }

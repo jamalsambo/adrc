@@ -32,8 +32,20 @@ export const useEmployeeStore = defineStore('employee', {
       if (error) throw error;
       this.empployee = data;
     },
+    async remove(id) {
+       const { data, error } = await api.delete(`/employees/${id}`);
+      if (error) throw error;
+      return data;
+    },
     async addZones(params) {
       const { data, error } = await api.post("/employees/add-zones", {
+        ...params,
+      });
+      if (error) throw error;
+      return data;
+    },
+        async removeZones(params) {
+      const { data, error } = await api.delete("/employees/remove-zones", {
         ...params,
       });
       if (error) throw error;

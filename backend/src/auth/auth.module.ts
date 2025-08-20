@@ -11,7 +11,6 @@ import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
     UsersModule,
     PassportModule,
     JwtModule.register({

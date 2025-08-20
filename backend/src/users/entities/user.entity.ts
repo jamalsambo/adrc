@@ -46,8 +46,8 @@ export class UserEntity {
   @Column({ type: 'varchar', nullable: true })
   avatar: string;
 
-  @Column({ type: 'uuid', name: 'user_type_id' })
-  userTypeId: string;
+  @Column({ type: 'uuid', name: 'user_type_id', nullable: true })
+  userTypeId?: string;
 
   @Column({ type: 'uuid', name: 'delegation_id' })
   delegationId: string;

@@ -58,6 +58,10 @@ export class EmployeesService {
     return await this.employeeRepository.save(employee);
   }
 
+  async remove (id: string): Promise<void> {
+    await this.employeeRepository.delete({id})
+  }
+
   async addZonesToEmployee(dto: CreateEmployeeHasZoneDto) {
     const { employeeId, zoneIds, createdBy } = dto;
 

@@ -147,6 +147,7 @@ import { useAuthStore } from "src/pages/auth/store";
 import { useEmployeeStore } from "../stores";
 import { useUserStore } from "src/pages/user/stores";
 import columns from "../components/ColumnsEmployees";
+import useNotify from "app/composables/UseNotify";
 
 // Inicialização dos objetos do Vue Router
 const router = useRouter();
@@ -155,6 +156,7 @@ const router = useRouter();
 const auth = useAuthStore()
 const employeeStores = useEmployeeStore();
 const userStores = useUserStore()
+const { notifySuccess, notifyError } = useNotify();
 
 /* Inicialização das variaveis  */
 const search = ref("");
@@ -177,8 +179,14 @@ function editEmployee(emp) {
 }
 
 /* Funcoa para deletar funcionario */
-function deleteEmployee(id) {
-  employees.value = employees.value.filter((emp) => emp.id !== id);
+async function deleteEmployee(id) {
+  try {
+    await employeeStores.remove(id)
+    employees.value = employees.value.filter((emp) => emp.id !== id);
+    notifySuccess("Usuario deletado com sucesso")
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 /* Funcao para navegacaoa a pagina de adicao do funcionario */
@@ -203,7 +211,6 @@ async function addUser (employee) {
         username: 'N/A',
         password: '123456',
         phone: 'N/A',
-        userTypeId: '015c13e7-fbe5-48f4-80b2-aaecd609f03d',
         delegationId: employee?.delegationId
    })
    await employeeStores.update(employee.id, {userId: userStores.user.id, updatedBy: auth.user.sub})

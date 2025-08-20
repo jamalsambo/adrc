@@ -40,6 +40,7 @@
         <q-list bordered separator v-if="assignedZones.length">
           <q-item v-for="zone in assignedZones" :key="zone.id">
             <q-item-section>{{ zone.name }}</q-item-section>
+             <q-item-section side> <q-icon name="delete" @click="removeZones(zone.id)" class="q-mr-sm" /></q-item-section>
           </q-item>
         </q-list>
         <div v-else class="text-grey text-italic q-mt-sm">
@@ -112,6 +113,22 @@ async function assignZones() {
   } catch (error) {
     console.log(error);
   }
+}
+
+async function removeZones(zone) {
+try {
+  const arr = Array.isArray(zone) ? zone : [zone];
+
+    const payload = {
+      employeeId: route.params.id, 
+      zoneIds: arr
+    }
+    console.log(payload)
+    await employeeStore.removeZones(payload)
+} catch (error) {
+  console.log(error);
+}
+
 }
 
 async function fetchData() {

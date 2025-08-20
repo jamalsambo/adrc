@@ -10,7 +10,7 @@ export class SeedAccess1755582300757 implements MigrationInterface {
                   ('6f4ebc9d-b5d5-4d44-aa5d-098fa45932ee', 'Leitor')        
                   `,
     );
-    
+
     await queryRunner.query(
       `INSERT INTO provinces (id, name) VALUES  ('cc0830fa-31c1-4d50-b2ec-44284b6bac5a', 'Zambezia')`,
     );
@@ -27,5 +27,5 @@ export class SeedAccess1755582300757 implements MigrationInterface {
     );
   }
 
-  public async down(queryRunner: QueryRunner): Promise<void> {}
+  public async down(queryRunner: QueryRunner): Promise<void> { }
 }

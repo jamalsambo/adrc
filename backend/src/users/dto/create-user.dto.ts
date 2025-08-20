@@ -39,8 +39,8 @@ export class CreateUserDto {
   avatar?: string;
 
   @IsUUID()
-  @IsNotEmpty()
-  userTypeId: string;
+  @IsOptional()
+  userTypeId?: string;
 
   @IsUUID()
   @IsNotEmpty()
