@@ -4,7 +4,7 @@
       <div id="reader" v-if="!dadosQr" style="width: 100%; height: 300px" />
 
       <div v-else class="column q-gutter-md">
-        <div class="text-h6">Cliente: {{ dadosQr.watermeterId }}</div>
+        <div class="text-h6">Cliente: {{ dadosQr.name }}</div>
 
         <q-form @submit.prevent="submitForm">
           <q-input
@@ -119,9 +119,13 @@ onMounted(async () => {
     (decodedText) => {
       try {
         const obj = JSON.parse(decodedText);
-        dadosQr.value = obj;
-        // if (obj.name && obj.customerId) dadosQr.value = obj
-        // else throw 'Inválido'
+        if (obj.watermeterId === watermeterId.value) {
+          console.log(obj)
+          dadosQr.value = obj
+        }else {
+          notifyError("QR inválido");
+          leitor = new Html5Qrcode("reader");
+        } 
       } catch {
         notifyError("QR inválido");
       }
@@ -188,6 +192,7 @@ async function submitForm() {
 
     await readingStore.create(payload);
     notifySuccess("Leitura lançada com sucesso!");
+     leitor.stop();
     } else {
       notifyError("Dados invalidos")
     }
