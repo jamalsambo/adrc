@@ -1,0 +1,35 @@
+import { defineStore } from "pinia";
+import { api } from "src/boot/axios";
+
+export const useReadingStore = defineStore("reading", {
+  state: () => ({
+    readings: [],
+    reading: {},
+    types: [],
+  }),
+  getters: {},
+  actions: {
+    async create(params) {
+      const { data, error } = await api.post("/readings", {
+        ...params,
+      });
+      if (error) throw error;
+      this.reading = data;
+    },
+     async find() {
+      const { data, error } = await api.get(`/readings`);
+      if (error) throw error;
+      this.readings = data;
+    },
+    async findOne(id) {
+      const { data, error } = await api.get(`/readings/${id}`);
+      if (error) throw error;
+      this.reading = data;
+    },
+    async findTypes() {
+      const { data, error } = await api.get("/readings/types");
+      if (error) throw error;
+      this.types = data;
+    },
+  },
+});
