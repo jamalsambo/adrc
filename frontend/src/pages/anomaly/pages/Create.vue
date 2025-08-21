@@ -4,25 +4,24 @@
       <q-card-section>
         <div class="text-h6">
           <q-icon name="speed" class="q-mr-sm" />
-          {{ isEdit ? "Editar Hidrômetro" : "Novo Hidrômetro" }}
+          {{ isEdit ? "Editar Anomalia" : "Nova Anomalia" }}
         </div>
       </q-card-section>
 
       <q-form @submit.prevent="handleSubmit" class="q-gutter-md q-mt-md">
         <q-input
-          v-model="form.number"
-          label="Número de Série"
+          v-model="form.code"
+          label="Codigo"
           filled
           :rules="[(v) => !!v || 'Obrigatório']"
           dense
         />
-        <q-select
-          v-model="form.status"
-          v-if="isEdit"
-          label="Estado"
+        <q-input
+          v-model="form.name"
+          label="Anomalia"
           filled
-          :options="['Activo', 'Inactivo']"
           :rules="[(v) => !!v || 'Obrigatório']"
+          dense
         />
 
         <div class="row justify-end q-gutter-sm">
@@ -30,7 +29,7 @@
             flat
             label="Cancelar"
             color="grey"
-            @click="router.push('/watermeters')"
+            @click="router.push('/anomalies')"
           />
           <q-btn label="Salvar" color="primary" type="submit" />
         </div>
@@ -43,24 +42,21 @@
 import { reactive, ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import useNotify from "app/composables/UseNotify";
-import { useAuthStore } from "src/pages/auth/store";
-import { useWatermeterStore } from "../stores";
+import { useAnomalyStore } from "../stores";
 
 /*  Inicialização dos objetos do Vue Router */
 const router = useRouter();
 const route = useRoute();
 
 /* Inicialização das stores */
-const auth = useAuthStore();
-const watermeterStore = useWatermeterStore();
+const anomalyStore = useAnomalyStore();
 const { notifySuccess, notifyError } = useNotify();
 
 /* Inicialização das variaveis */
 const isEdit = ref(false);
 const form = reactive({
-  number: "",
-  status: "Activo",
-  delegationId: auth.user.delegationId,
+  code: "",
+  name: "",
 });
 
 
@@ -68,32 +64,26 @@ const form = reactive({
 async function handleSubmit() {
   try {
     if (isEdit.value) {
-      await watermeterStore.update(route.params.id, {
+      await anomalyStore.update(route.params.id, {
         ...form,
-        updatedBy: auth.user.sub,
       });
-      notifySuccess("Hidrômetro editado com sucesso");
+      notifySuccess("Anomaolia editado com sucesso");
     } else {
-      await watermeterStore.create({
-        ...form,
-        lantitude: 123,
-        longitude: 123,
-        createdBy: auth.user.sub,
-      });
-      notifySuccess("Hidrômetro registado com sucesso");
+      await anomalyStore.create(form);
+      notifySuccess("Anomaolia registado com sucesso");
     }
   } catch (error) {
     notifyError("Ocorreu algum erro na operação");
   }
-  router.push("/watermeters")
+  router.push("/anomalies")
 }
 
 /* Logica de inicializacao da pagina */
 onMounted(() => {
   if (route.params.id) {
     isEdit.value = true;
-    watermeterStore.findOne(route.params.id)
-    Object.assign(form, watermeterStore.watermeter);
+    anomalyStore.findOne(route.params.id)
+    Object.assign(form, anomalyStore.anomaly);
   }
 });
 </script>

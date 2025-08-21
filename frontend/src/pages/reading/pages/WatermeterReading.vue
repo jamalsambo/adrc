@@ -6,9 +6,7 @@
           <q-icon name="speed" class="q-mr-sm" />
           Leitura de Hidrômetro
         </div>
-        <div class="text-subtitle2 text-grey">
-          Hidrômetro #{{ hydrometer?.number }}
-        </div>
+        <div class="text-subtitle2 text-grey">Hidrômetro #{{ hydrometer?.number }}</div>
       </q-card-section>
 
       <q-card-section>
@@ -24,7 +22,7 @@
             label="Fazer Leitura"
             icon="check_circle"
             color="positive"
-            :disable="distance > 100 || !ready"
+    
             @click="submitReading"
           />
         </div>
@@ -34,6 +32,7 @@
 </template>
 
 <script setup>
+        // :disable="distance > 100 || !ready"
 import { ref, onMounted, nextTick } from "vue";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -41,14 +40,14 @@ import "leaflet-routing-machine";
 import { useWatermeterStore } from "src/pages/watermeter/stores";
 import { useRoute, useRouter } from "vue-router";
 
-const route = useRoute()
-const router = useRouter()
+const route = useRoute();
+const router = useRouter();
 
-const watermeterStore = useWatermeterStore()
+const watermeterStore = useWatermeterStore();
 
 // Dados simulados do hidrômetro (normalmente vem de API ou route param)
-const { id, inspectionId } = route.params
-const hydrometer = ref()
+const { id, inspectionId } = route.params;
+const hydrometer = ref();
 
 // Variáveis reativas
 const userLocation = ref(null);
@@ -110,7 +109,7 @@ async function initMap() {
     (pos) => {
       const lat = pos.coords.latitude;
       const lon = pos.coords.longitude;
-      console.log(lon)
+      console.log(lon);
       userLocation.value = { lat, lon };
       ready.value = true;
 
@@ -155,21 +154,21 @@ async function initMap() {
 
 // Dispara ao clicar em "Fazer Leitura"
 function submitReading() {
-   router.push(`/inspections/${inspectionId}/readings/watermeter/${id}/qrcode`)
+  router.push(`/inspections/${inspectionId}/readings/watermeter/${id}/qrcode`);
 }
 
 async function fetchData() {
   try {
-    await watermeterStore.findOne(id)
-    hydrometer.value = watermeterStore.watermeter
+    await watermeterStore.findOne(id);
+    hydrometer.value = watermeterStore.watermeter;
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
 }
 
 // Inicializa tudo ao montar o componente
-onMounted( async () => {
-  await fetchData()
+onMounted(async () => {
+  await fetchData();
   initMap();
 });
 </script>

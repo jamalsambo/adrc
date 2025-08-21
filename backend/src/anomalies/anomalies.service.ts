@@ -43,4 +43,8 @@ export class AnomaliesService {
     this.anomalyRepo.merge(anomaly, updateAnomalyDto);
     return await this.anomalyRepo.save(anomaly);
   }
+
+  async remove (id: string): Promise<void> {
+    this.anomalyRepo.delete({id})
+  }
 }

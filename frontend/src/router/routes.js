@@ -6,6 +6,8 @@ import {
   inspectionRoutes,
   readingRoutes,
   userRoutes,
+  anomalyRoutes,
+  zoneRoutes
 } from "./pageRoutes";
 
 const routes = [
@@ -21,6 +23,8 @@ const routes = [
       ...inspectionRoutes,
       ...readingRoutes,
       ...userRoutes,
+      ...anomalyRoutes,
+      ...zoneRoutes
     ],
   },
 
