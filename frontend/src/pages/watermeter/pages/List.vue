@@ -14,7 +14,7 @@
           label="Novo"
           @click="addHydrometer"
           class="q-mr-sm"
-          v-if="!$q.screen.lt.sm"
+          v-if="!$q.screen.lt.sm && auth.hasCreateWatermeter"
         />
         <q-btn
           color="primary"
@@ -72,6 +72,7 @@
               color="primary"
               @click="editHydrometer(props.row)"
               title="Editar"
+              v-if="auth.hasEditWatermeter"
             />
             <q-btn
               dense
@@ -81,6 +82,7 @@
               color="negative"
               @click="deleteHydrometer(props.row.id)"
               title="Deletar"
+              v-if="auth.hasDeleteWatermeter"
             />
             <q-btn
               dense
@@ -90,6 +92,7 @@
               color="teal"
               @click="associateClient(props.row)"
               title="Associar a cliente"
+              v-if="auth.hasAssignWatermeterCustomer"
             />
             <q-btn
               dense
@@ -99,6 +102,7 @@
               color="purple"
               @click="viewReadings(props.row)"
               title="Leituras"
+               v-if="auth.hasViewWatermeterReading"
             />
           </q-td>
         </template>
@@ -124,12 +128,14 @@
               color="primary"
               @click="editHydrometer(hyd)"
               title="Editar"
+               v-if="auth.hasEditWatermeter"
             />
             <q-btn
               flat
               icon="delete"
               color="negative"
               @click="deleteHydrometer(hyd.id)"
+                v-if="auth.hasDeleteWatermeter"
             />
             <q-btn
               dense
@@ -138,6 +144,7 @@
               icon="link"
               color="teal"
               @click="associateClient(hyd.id)"
+              v-if="auth.hasAssignWatermeterCustomer"
             />
             <q-btn
               dense
@@ -146,6 +153,7 @@
               icon="bar_chart"
               color="purple"
               @click="viewReadings(hyd.id)"
+              v-if="auth.hasViewWatermeterReading"
             />
           </q-card-actions>
         </q-card>
@@ -160,9 +168,11 @@ import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { useWatermeterStore } from "../stores";
 import columns from "../components/WatermeterColumns";
+import { useAuthStore } from "src/pages/auth/store";
 
 const $q = useQuasar();
 /* Inicialização dos objetos do Vue Router */
+const auth = useAuthStore()
 const router = useRouter();
 
 /* Inicialização das stores */

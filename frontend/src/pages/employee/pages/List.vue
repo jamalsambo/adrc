@@ -17,7 +17,7 @@
             icon="person_add"
             label="Novo"
             @click="addEmployee"
-            v-if="!$q.screen.lt.sm"
+            v-if="!$q.screen.lt.sm && auth.hasCreateEmployee"
           />
           <!-- Ícone apenas no mobile -->
           <q-btn
@@ -69,6 +69,7 @@
                 icon="edit"
                 size="sm"
                 @click="editEmployee(props.row)"
+                v-if="auth.hasEditEmployee"
               />
               <q-btn
                 dense
@@ -79,6 +80,7 @@
                 size="sm"
                 class="q-ml-xs"
                 @click="deleteEmployee(props.row.id)"
+                 v-if="auth.hasDeleteEmployee"
               />
               <q-btn
                 dense
@@ -87,6 +89,7 @@
                 icon="edit_location"
                 size="sm"
                 @click="assignedZones(props.row)"
+                v-if="auth.hasAssignZoneEmployee"
               />
               <q-btn
                 flat
@@ -96,6 +99,7 @@
                 @click="addUser(props.row)"
                 color="primary"
                 title="Configurar Acesso"
+                v-if="auth.hasCreateUser"
               />
             </q-td>
           </template>

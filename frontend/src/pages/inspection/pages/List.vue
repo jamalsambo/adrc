@@ -13,7 +13,7 @@
           label="Nova"
           color="primary"
           @click="createInspection"
-          v-if="!$q.screen.lt.sm"
+          v-if="!$q.screen.lt.sm && auth.hasCreateInspection"
         />
         <q-btn
           icon="add"
@@ -65,6 +65,7 @@
               color="primary"
               @click="distributeWatermeter(props.row)"
               title="Ditribuição de hidrometro"
+              v-if="auth.hasDistribuiteWatermeter"
             />
             <q-btn
               flat
@@ -74,6 +75,7 @@
               color="primary"
               @click="distributeListe(props.row)"
               title="Lista de Hidrometro"
+                 v-if="auth.hasViewDistribuiteWatermeter"
             />
             <q-btn
               flat
@@ -83,6 +85,7 @@
               color="negative"
               @click="deleteInspection(props.row.id)"
               title="Eliminar inspeção"
+              v-if="auth.hasDeleteInspection"
             />
           </q-td>
         </template>
@@ -94,10 +97,13 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useAuthStore } from "src/pages/auth/store";
 import { useInspectionStore } from "../stores";
 import columns from "../components/InspectionColumns";
 
+
 /* Inicialização dos objetos do Vue Router */
+const auth = useAuthStore()
 const router = useRouter();
 
 /* Inicialização das stores */

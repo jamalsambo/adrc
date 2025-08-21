@@ -17,7 +17,7 @@
           label="Novo"
           @click="addConsumer"
           class="q-mr-sm"
-          v-if="!$q.screen.lt.sm"
+          v-if="!$q.screen.lt.sm && auth.hasCreateCustomer"
         />
         <q-btn
           color="primary"
@@ -65,6 +65,7 @@
               icon="edit"
               color="primary"
               @click="editConsumer(props.row)"
+              v-if="auth.hasEditCustomer"
             />
             <q-btn
               dense
@@ -73,6 +74,7 @@
               icon="delete"
               color="negative"
               @click="deleteConsumer(props.row.id)"
+              v-if="auth.hasDeleteCustomer"
             />
           </q-td>
         </template>
@@ -121,10 +123,13 @@ import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import columns from "../components/CustomerColumns";
 import { useCustomerStore } from "../stores";
+import { useAuthStore } from "src/pages/auth/store";
+
 
 const $q = useQuasar();
 
 // Inicialização dos objetos do Vue Router
+const auth = useAuthStore()
 const router = useRouter();
 
 /* Inicialização das stores */

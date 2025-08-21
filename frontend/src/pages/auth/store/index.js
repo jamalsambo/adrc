@@ -14,7 +14,7 @@ export const useAuthStore = defineStore("auth", {
     hasViewInspection: (state) =>  state.permissions?.some((p) => p.permission.key === "view_inspection"),
     hasViewReading: (state) =>  state.permissions?.some((p) => p.permission.key === "view_reading"),
     hasViewWatermeter: (state) =>  state.permissions?.some((p) => p.permission.key === "view_watermeter"),
-    hasViewReading: (state) =>  state.permissions?.some((p) => p.permission.key === "view_graphic_reading"),
+    hasViewGraphicReading: (state) =>  state.permissions?.some((p) => p.permission.key === "view_graphic_reading"),
 
     hasCreateEmployee: (state) =>  state.permissions?.some((p) => p.permission.key === "create_employee"),
     hasEditEmployee: (state) =>  state.permissions?.some((p) => p.permission.key === "edit_employee"),

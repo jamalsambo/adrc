@@ -3,10 +3,11 @@
     <div class="q-gutter-md">
       <!-- TÍTULO -->
       <q-banner class="bg-primary text-white text-h6 q-pa-md rounded-borders shadow-2">
-        Painel de Inspeções
+        Painel de Principal
       </q-banner>
 
       <!-- ÚLTIMAS INSPEÇÕES -->
+      <div v-if="auth.hasViewInspection">
       <div class="text-h6 q-mt-md q-mb-sm">Últimas Inspeções</div>
       <div class="row q-col-gutter-md">
         <div
@@ -37,8 +38,10 @@
           </q-card>
         </div>
       </div>
+      </div>
 
       <!-- ÚLTIMAS LEITURAS -->
+      <div v-if="auth.hasViewReading">
       <div class="text-h6 q-mt-md q-mb-sm">Últimas Leituras</div>
       <div class="row q-col-gutter-md">
         <div
@@ -63,8 +66,10 @@
           </q-card>
         </div>
       </div>
+      </div>
 
       <!-- ÚLTIMOS HIDRÔMETROS -->
+      <div v-if="auth.hasViewWatermeter">
       <div class="text-h6 q-mt-md q-mb-sm">Últimos Hidrômetros</div>
       <div class="row q-col-gutter-md">
         <div
@@ -82,6 +87,7 @@
             </q-card-actions>
           </q-card>
         </div>
+      </div>
       </div>
 
       <!-- ZONAS DE INSPEÇÃO -->

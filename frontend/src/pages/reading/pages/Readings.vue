@@ -16,7 +16,7 @@
           label="Exportar"
           @click="exportTxt"
           class="q-mr-sm"
-          v-if="!$q.screen.lt.sm"
+          v-if="!$q.screen.lt.sm && auth.hasExportReadings" 
         />
         <q-btn
           color="primary"
@@ -26,7 +26,7 @@
           @click="exportTxt"
           v-else
         >
-          <q-tooltip anchor="top middle">Adicionar</q-tooltip>
+          <q-tooltip anchor="top middle">Exportar</q-tooltip>
         </q-btn>
       </q-toolbar>
 
@@ -64,6 +64,7 @@
               icon="visibility"
               color="primary"
               @click="viewReading(props.row)"
+              v-if="auth.hasViewReadings"
             />
           </q-td>
         </template>
@@ -106,9 +107,10 @@ import { useRouter } from "vue-router";
 import columns from "../components/ReadingsColumns";
 import { useReadingStore } from "../stores";
 import { exportFile } from "quasar";
-
+import { useAuthStore } from "src/pages/auth/store";
 
 // Inicialização dos objetos do Vue Router
+const auth = useAuthStore()
 const router = useRouter();
 
 /* Inicialização das stores */
