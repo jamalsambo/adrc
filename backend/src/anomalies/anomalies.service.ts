@@ -13,31 +13,8 @@ export class AnomaliesService {
     private readonly anomalyRepo: Repository<AnomalyEntity>,
   ) {}
 
-  async generateAnomalyCode(): Promise<string> {
-    const last = await this.anomalyRepo
-      .createQueryBuilder('a')
-      .orderBy('a.code', 'DESC')
-      .getOne();
-
-    let nextNumber = 1;
-
-    if (last?.code) {
-      const lastCodeNumber = parseInt(last.code.replace('AN-', ''), 10);
-      if (!isNaN(lastCodeNumber)) {
-        nextNumber = lastCodeNumber + 1;
-      }
-    }
-
-    const padded = String(nextNumber).padStart(4, '0');
-    return `AN-${padded}`;
-  }
   async create(createAnomalyDto: CreateAnomalyDto) {
-    const code = await this.generateAnomalyCode();
-    const anomaly = this.anomalyRepo.create({
-      ...createAnomalyDto,
-      code,
-    });
-    return this.anomalyRepo.save(anomaly);
+    return this.anomalyRepo.save(createAnomalyDto);
   }
 
   async findAll() {
