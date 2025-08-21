@@ -1,12 +1,12 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ReadingsService } from './readings.service';
 import { CreateReadingDto } from './dto/create-reading.dto';
 import { UpdateReadingDto } from './dto/update-reading.dto';
 
 @Controller('readings')
 export class ReadingsController {
-  constructor(private readonly readingsService: ReadingsService) {}
+  constructor(private readonly readingsService: ReadingsService) { }
 
   @Post()
   create(@Body() createReadingDto: CreateReadingDto) {
@@ -14,8 +14,11 @@ export class ReadingsController {
   }
 
   @Get()
-  findAll() {
-    return this.readingsService.findAll();
+  findAll(
+    @Query('userId') userId?: string,
+    @Query('limit') limit?: number,
+  ) {
+    return this.readingsService.findAll(userId,limit);
   }
 
   @Get('types')
@@ -25,7 +28,7 @@ export class ReadingsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.readingsService.findOneOrFail({id});
+    return this.readingsService.findOneOrFail({ id });
   }
 
   @Patch(':id')

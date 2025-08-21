@@ -17,8 +17,8 @@ export const useCustomerStore = defineStore('customer', {
       if (error) throw error;
       this.customer = data;
     },
-     async update(id,params) {
-      const { data, error } = await api.patch(`/customers/${id}`, {...params});
+    async update(id, params) {
+      const { data, error } = await api.patch(`/customers/${id}`, { ...params });
       if (error) throw error;
       this.customer = data;
     },
@@ -32,8 +32,17 @@ export const useCustomerStore = defineStore('customer', {
       if (error) throw error;
       this.customer = data;
     },
-    async addWatermeter(params){
+    async remove(id) {
+      const { data, error } = await api.delete(`/customers/${id}`);
+      if (error) throw error;
+    },
+    async addWatermeter(params) {
       const { data, error } = await api.post(`/customers/add-watermeter`, params);
+      if (error) throw error;
+      return data;
+    },
+    async removeWatermeter(customerId,watermeterId) {
+      const { data, error } = await api.delete(`/customers/${customerId}/watermeter/${watermeterId}`);
       if (error) throw error;
       return data;
     }

@@ -19,17 +19,20 @@ export class WatermetersService {
 
     @InjectRepository(InspectionHasWatermeter)
     private readonly employeeHasWatermeterRepo: Repository<InspectionHasWatermeter>,
-  ) {}
+  ) { }
   async create(createWatermeterDto: CreateWatermeterDto) {
     return await this.watermeterRespository.save(createWatermeterDto);
   }
 
   async findAll() {
     return await this.watermeterRespository.find({
-      relations: ['zone', 'hasCustomers']
+      relations: ['zone', 'hasCustomers'],
+      order: {
+        createdAt: 'DESC', // 🔹 do mais recente para o mais antigo
+      },
     });
   }
-
+  
   async findOneOrFail(
     conditions: FindOptionsWhere<WatermeterEntity>,
     options?: FindOneOptions<WatermeterEntity>,

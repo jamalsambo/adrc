@@ -15,7 +15,7 @@ export class ReadingsService {
 
     @InjectRepository(TypeReadingsEntity)
     private readonly typeReadingRepo: Repository<TypeReadingsEntity>,
-  ) {}
+  ) { }
 
   async generateReadingNumber(): Promise<string> {
     const lastReading = await this.readingRepo
@@ -47,8 +47,8 @@ export class ReadingsService {
     return this.readingRepo.save(reading);
   }
 
-  async findAll() {
-    const reading = await this.readingRepo
+  async findAll(userId?: string, limit?: number) {
+    const qb = this.readingRepo
       .createQueryBuilder('r')
       .leftJoin('r.watermeter', 'w')
       .leftJoin('r.customer', 'c')
@@ -60,6 +60,7 @@ export class ReadingsService {
         'r.id',
         'r.number',
         'r.reading',
+        'r.createdAt',
         'w.number',
         'c.fullName',
         't.name',
@@ -67,11 +68,23 @@ export class ReadingsService {
         'a.name',
         'rd.displayName',
         'i.number',
-      ])
-      .getMany();
+      ]).orderBy('r.createdAt', 'DESC');
+     // 🔹 mais recentes primeiro (assumindo que exista createdAt)
 
+    // 🔹 Se userId for informado → filtra pelo leitor
+    if (userId) {
+      qb.andWhere('r.userId = :userId', { userId });
+    }
+
+    // 🔹 Se limit for informado → limita quantidade de registros
+    if (limit) {
+      qb.take(limit);
+    }
+
+    const reading = await qb.getMany();
     return reading;
   }
+
 
   async findOneOrFail(conditions: FindOptionsWhere<ReadingEntity>) {
     try {

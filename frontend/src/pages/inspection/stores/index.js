@@ -19,13 +19,17 @@ export const useInspectionStore = defineStore('inspection', {
       if (error) throw error;
       this.inspection = data;
     },
-     async update(id,params) {
-      const { data, error } = await api.patch(`/inspections/${id}`, {...params});
+    async update(id, params) {
+      const { data, error } = await api.patch(`/inspections/${id}`, { ...params });
       if (error) throw error;
       this.inspection = data;
     },
-    async find() {
-      const { data, error } = await api.get("/inspections");
+    async find(params) {
+      const { data, error } = await api.get("/inspections", {
+        params: {
+          ...params
+        }
+      });
       if (error) throw error;
       this.inspections = data;
     },
@@ -34,8 +38,8 @@ export const useInspectionStore = defineStore('inspection', {
       if (error) throw error;
       this.types = data;
     },
-    async findOne(id) {
-      const { data, error } = await api.get(`/inspections/${id}`);
+    async findOne(id, params) {
+      const { data, error } = await api.get(`/inspections/${id}`, { params: { ...params } });
       if (error) throw error;
       this.inspection = data;
     },

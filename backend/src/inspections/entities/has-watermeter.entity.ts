@@ -2,6 +2,7 @@
 import { EmployeeEntity } from 'src/employees/entities/employee.entity';
 import { WatermeterEntity } from 'src/watermeters/entities/watermeter.entity';
 import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { InspectionEntity } from './inspection.entity';
 
 @Entity('inspections_has_watermeters')
 export class InspectionHasWatermeter {
@@ -24,4 +25,9 @@ export class InspectionHasWatermeter {
   @ManyToOne(() => EmployeeEntity, (employee) => employee.hasInspections)
   @JoinColumn({ name: 'employee_id' })
   employee: WatermeterEntity;
+
+  @ManyToOne(() => InspectionEntity, (employee) => employee.hasWatermeters)
+  @JoinColumn({ name: 'inspection_id' })
+  insp: InspectionEntity;
+
 }

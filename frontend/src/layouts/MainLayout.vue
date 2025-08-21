@@ -3,7 +3,7 @@
     <q-header elevated>
       <q-toolbar>
         <q-btn flat dense round @click="toggleLeftDrawer" icon="menu" aria-label="Menu" />
-        <q-toolbar-title> E-Digital </q-toolbar-title>
+        <q-toolbar-title> ADRC </q-toolbar-title>
         <q-space />
         <div class="q-gutter-sm row items-center no-wrap">
           <q-btn
@@ -16,64 +16,17 @@
             v-if="$q.screen.gt.sm"
           >
           </q-btn>
-          <q-btn
-            round
-            dense
-            flat
-            color="white"
-            icon="fab fa-github"
-            type="a"
-            href="https://github.com/pratik227/quasar-admin"
-            target="_blank"
-          >
-          </q-btn>
-          <q-btn
-            round
-            dense
-            flat
-            style="color: red !important"
-            type="a"
-            href="https://github.com/sponsors/pratik227"
-            target="_blank"
-          >
-            <i class="fa fa-heart fa-2x fa-beat"></i>
-          </q-btn>
-          <q-btn round dense flat color="white" icon="notifications">
-            <q-badge color="red" text-color="white" floating> 5 </q-badge>
-            <q-menu>
-              <q-list style="min-width: 100px">
-                <messages></messages>
-                <q-card class="text-center no-shadow no-border">
-                  <q-btn
-                    label="View All"
-                    style="max-width: 120px !important"
-                    flat
-                    dense
-                    class="text-indigo-8"
-                  ></q-btn>
-                </q-card>
-              </q-list>
-            </q-menu>
-          </q-btn>
           <q-btn round flat>
             <q-avatar size="26px">
               <q-btn icon="person">
                 <q-menu>
-                  <div class="row no-wrap q-pa-md">
-                    <div class="column">
-                      <div class="text-h6 q-mb-md">Settings</div>
-                      <q-toggle v-model="mobileData" label="Use Mobile Data" />
-                      <q-toggle v-model="bluetooth" label="Bluetooth" />
-                    </div>
-
-                    <q-separator vertical inset class="q-mx-lg" />
-
+                  <div class="row q-pa-md">
                     <div class="column items-center">
                       <q-avatar size="72px">
                         <img src="https://cdn.quasar.dev/img/avatar4.jpg" />
                       </q-avatar>
 
-                      <div class="text-subtitle1 q-mt-md q-mb-xs">John Doe</div>
+                      <div class="text-subtitle1 q-mt-md q-mb-xs text-center">{{ authStore.user.displayName  }}</div>
 
                       <q-btn
                         color="primary"

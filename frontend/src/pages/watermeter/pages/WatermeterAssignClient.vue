@@ -4,7 +4,11 @@
       <q-card-section>
         <div class="text-h6">
           <q-icon name="link" class="q-mr-sm" />
-         {{dados?.customerId ? `Hidrômetro associado ao ${dados?.name}`: " Associar Hidrômetro ao Cliente"}}
+          {{
+            dados?.customerId
+              ? `Hidrômetro associado ao ${dados?.name}`
+              : " Associar Hidrômetro ao Cliente"
+          }}
         </div>
       </q-card-section>
 
@@ -20,7 +24,7 @@
           option-value="id"
           map-options
           emit-value
-          :rules="[(v) => !!v || 'Obrigatório']"
+          clearable
         />
 
         <map-picker
@@ -42,7 +46,7 @@
           :rules="[(v) => !!v || 'Obrigatório']"
         />
 
-        <q-card class="q-pa-md column items-center" v-if="dados?.customerId" >
+        <q-card class="q-pa-md column items-center" v-if="dados?.customerId">
           <!-- QR Code exibido -->
           <div v-if="qrCodeDataUrl" class="q-mt-md" ref="qrContainer">
             <img
@@ -50,14 +54,13 @@
               alt="QR Code Gerado"
               style="width: 100%; max-width: 300px"
             />
-
           </div>
-           <q-btn
-              @click="exportarPDF"
-              label="Exportar PDF"
-              class="q-mt-md"
-              color="primary"
-            />
+          <q-btn
+            @click="exportarPDF"
+            label="Exportar PDF"
+            class="q-mt-md"
+            color="primary"
+          />
         </q-card>
 
         <div class="row justify-end q-gutter-sm">
@@ -67,7 +70,11 @@
             color="grey"
             @click="router.push('/watermeters')"
           />
-          <q-btn :label="dados?.customerId? 'Dissassociar': 'Associar'" color="primary" type="submit" />
+          <q-btn
+            :label="dados?.customerId ? 'Dissassociar' : 'Associar'"
+            color="primary"
+            type="submit"
+          />
         </div>
       </q-form>
     </q-card>
@@ -110,7 +117,7 @@ const formAssociete = ref({
   watermeterId: route.params.id,
   createdBy: auth.user.sub,
 });
-const dados = ref(null)
+const dados = ref(null);
 const clientOptions = ref([]);
 const zones = ref([]);
 const qrCodeDataUrl = ref("");
@@ -118,12 +125,25 @@ const qrContainer = ref(null);
 
 async function submitAssociation() {
   try {
-    await customerStore.addWatermeter(formAssociete.value);
-    await watermeterStore.update(route.params.id, {
-      ...form.value,
-      updatedBy: auth.user.sub,
-    });
-    notifySuccess("Hidrometro associado com sucesso");
+    if (!dados.value?.customerId) {
+      await customerStore.addWatermeter(formAssociete.value);
+      await watermeterStore.update(route.params.id, {
+        ...form.value,
+        updatedBy: auth.user.sub,
+      });
+      notifySuccess("Hidrometro associado com sucesso");
+    } else {
+      await customerStore.removeWatermeter(
+        dados.value.customerId,
+        dados.value.watermeterId
+      );
+      await watermeterStore.update(route.params.id, {
+        ...form.value,
+        updatedBy: auth.user.sub,
+      });
+      notifySuccess("Hidrometro desassociado com sucesso");
+    }
+    router.back();
   } catch (error) {
     console.log(error);
     notifyError("OCorreu um erro ao associar hidrometro");
@@ -135,10 +155,10 @@ async function fetchData() {
     await watermeterStore.findOne(id);
     watermeter.value = watermeterStore.watermeter;
 
-        await composablesStore.findZones();
+    await composablesStore.findZones();
     zones.value = composablesStore.zones;
 
-        await customerStore.find();
+    await customerStore.find();
     clientOptions.value = customerStore.customers;
 
     form.value.lantitude = watermeter.value?.lantitude;
@@ -157,27 +177,23 @@ async function fetchData() {
       watermeterId: mostRecent.watermeterId,
     };
 
-    qrCodeDataUrl.value = await QRCode.toDataURL(JSON.stringify(dados.value))
-
-
-
-
+    qrCodeDataUrl.value = await QRCode.toDataURL(JSON.stringify(dados.value));
   } catch (error) {
     console.log(error);
   }
 }
 
 const exportarPDF = () => {
-  if (!qrContainer.value) return
+  if (!qrContainer.value) return;
   const opt = {
-    margin:       1,
-    filename:     `${dados.value.name || 'qr-code'}.pdf`,
-    image:        { type: 'png', quality: 1 },
-    html2canvas:  { scale: 2 },
-    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-  }
-  html2pdf().set(opt).from(qrContainer.value).save()
-}
+    margin: 1,
+    filename: `${dados.value.name || "qr-code"}.pdf`,
+    image: { type: "png", quality: 1 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+  };
+  html2pdf().set(opt).from(qrContainer.value).save();
+};
 
 /* Logica de inicializacao da pagina */
 onMounted(async () => {

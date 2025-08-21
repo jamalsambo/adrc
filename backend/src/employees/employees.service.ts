@@ -21,7 +21,7 @@ export class EmployeesService {
 
     @InjectRepository(PositionEntity)
     private readonly positionRepo: Repository<PositionEntity>,
-  ) {}
+  ) { }
   async create(createEmployeeDto: CreateEmployeeDto) {
     return await this.employeeRepository.save(createEmployeeDto);
   }
@@ -39,7 +39,7 @@ export class EmployeesService {
     try {
       const user = await this.employeeRepository.findOneOrFail({
         where: conditions,
-        relations: ['zones'],
+        relations: ['zones', 'hasInspections'],
         ...options,
       });
 
@@ -58,8 +58,8 @@ export class EmployeesService {
     return await this.employeeRepository.save(employee);
   }
 
-  async remove (id: string): Promise<void> {
-    await this.employeeRepository.delete({id})
+  async remove(id: string): Promise<void> {
+    await this.employeeRepository.delete({ id })
   }
 
   async addZonesToEmployee(dto: CreateEmployeeHasZoneDto) {
@@ -108,7 +108,7 @@ export class EmployeesService {
     };
   }
 
-  async findPositions () {
+  async findPositions() {
     return this.positionRepo.find()
   }
 }

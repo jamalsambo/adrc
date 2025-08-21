@@ -16,8 +16,8 @@ export const useReadingStore = defineStore("reading", {
       if (error) throw error;
       this.reading = data;
     },
-     async find() {
-      const { data, error } = await api.get(`/readings`);
+     async find(params) {
+      const { data, error } = await api.get(`/readings`, {params: {...params}});
       if (error) throw error;
       this.readings = data;
     },

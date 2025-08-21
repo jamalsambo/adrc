@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { InspectionTypesEntity } from './type.entity';
 import { ReadingEntity } from 'src/readings/entities/reading.entity';
+import { InspectionHasWatermeter } from './has-watermeter.entity';
 
 @Entity('inspections')
 export class InspectionEntity {
@@ -44,4 +45,7 @@ export class InspectionEntity {
 
   @OneToMany(() => ReadingEntity, readings => readings.inspection)
   readings: ReadingEntity[]
+
+  @OneToMany(() => InspectionHasWatermeter, hasWatermeter => hasWatermeter.insp)
+  hasWatermeters: InspectionHasWatermeter[]
 }

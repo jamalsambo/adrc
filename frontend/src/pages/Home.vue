@@ -2,9 +2,7 @@
   <q-page padding>
     <div class="q-gutter-md">
       <!-- TÍTULO -->
-      <q-banner
-        class="bg-primary text-white text-h6 q-pa-md rounded-borders shadow-2"
-      >
+      <q-banner class="bg-primary text-white text-h6 q-pa-md rounded-borders shadow-2">
         Painel de Inspeções
       </q-banner>
 
@@ -14,15 +12,27 @@
         <div
           v-for="(item, index) in latestInspections"
           :key="index"
-          class="col-md-3 col-sm-6 col-xs-12"
+          class="col-md-4 col-sm-6 col-xs-12"
         >
-          <q-card >
+          <q-card>
             <q-card-section>
-              <div class="text-subtitle1">{{ item.title }}</div>
-              <div class="text-caption text-grey">{{ item.date }}</div>
+              <div class="text-subtitle1">{{ item.number }}</div>
+              <div class="text-caption text-grey">
+                Número de Cliente: {{ item.watermetersCount }}
+              </div>
+              <div class="text-caption text-grey">Mes: {{ item.month }}</div>
+              <div class="text-caption text-grey">
+                Data de criaçã: {{ formatarData(item.createdAt) }}
+              </div>
             </q-card-section>
             <q-card-actions align="right">
-              <q-btn flat color="primary" icon="visibility" label="Detalhes" />
+              <q-btn
+                flat
+                color="primary"
+                icon="visibility"
+                label="Detalhes"
+                @click="router.push(`inspections/${item.id}/watermeters`)"
+              />
             </q-card-actions>
           </q-card>
         </div>
@@ -30,50 +40,57 @@
 
       <!-- ÚLTIMAS LEITURAS -->
       <div class="text-h6 q-mt-md q-mb-sm">Últimas Leituras</div>
-       <div class="row q-col-gutter-md">
+      <div class="row q-col-gutter-md">
         <div
           v-for="(item, index) in latestReadings"
           :key="index"
           class="col-md-3 col-sm-6 col-xs-12"
         >
-        <q-card>
-          <q-card-section>
-            <div class="text-subtitle1">{{ item.value }} m³</div>
-            <div class="text-caption text-grey">{{ item.date }}</div>
-          </q-card-section>
-          <q-card-actions align="right">
-            <q-btn flat color="primary" icon="visibility" label="Detalhes" />
-          </q-card-actions>
-        </q-card>
+          <q-card>
+            <q-card-section>
+              <div class="text-subtitle1">{{ item.reading }} m³</div>
+              <div class="text-caption text-grey">{{ formatarData(item.createdAt) }}</div>
+            </q-card-section>
+            <q-card-actions align="right">
+              <q-btn
+                flat
+                color="primary"
+                icon="visibility"
+                label="Detalhes"
+                @click="router.push(`/readings/${item.id}`)"
+              />
+            </q-card-actions>
+          </q-card>
         </div>
       </div>
 
       <!-- ÚLTIMOS HIDRÔMETROS -->
       <div class="text-h6 q-mt-md q-mb-sm">Últimos Hidrômetros</div>
-       <div class="row q-col-gutter-md">
+      <div class="row q-col-gutter-md">
         <div
           v-for="(item, index) in latestWatermeters"
           :key="index"
           class="col-md-3 col-sm-6 col-xs-12"
         >
-        <q-card
-
-        >
-          <q-card-section>
-            <div class="text-subtitle1">Nº {{ item.serial }}</div>
-            <div class="text-caption text-grey">
-              Instalado em: {{ item.installedAt }}
-            </div>
-          </q-card-section>
-          <q-card-actions align="right">
-            <q-btn flat color="primary" icon="visibility" label="Detalhes" />
-          </q-card-actions>
-        </q-card>
+          <q-card>
+            <q-card-section>
+              <div class="text-subtitle1">Nº {{ item.number }}</div>
+              <div class="text-caption text-grey">Estado em: {{ item.status }}</div>
+            </q-card-section>
+            <q-card-actions align="right">
+              <q-btn flat color="primary" icon="visibility" label="Detalhes"  @click="router.push(`/watermeters/${item.id}/info/`)"/>
+            </q-card-actions>
+          </q-card>
         </div>
       </div>
 
       <!-- ZONAS DE INSPEÇÃO -->
-      <q-card flat bordered class="q-pa-md q-mt-lg">
+      <q-card
+        flat
+        bordered
+        class="q-pa-md q-mt-lg"
+        v-if="auth.user.userType === 'Leitor'"
+      >
         <div class="text-h6 q-mb-md">Zonas de Inspeção</div>
         <q-chip
           v-for="(zone, index) in employeeZones"
@@ -82,7 +99,7 @@
           text-color="white"
           class="q-mr-sm q-mb-sm"
         >
-          {{ zone }}
+          {{ zone.name }}
         </q-chip>
       </q-card>
     </div>
@@ -90,35 +107,80 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
+import { useAuthStore } from "./auth/store";
+import { useInspectionStore } from "./inspection/stores";
+import { useReadingStore } from "./reading/stores";
+import { useEmployeeStore } from "./employee/stores";
+import { useWatermeterStore } from "./watermeter/stores";
+import { useRouter } from "vue-router";
 
-const latestInspections = ref([
-  { title: "Inspeção Rua A", date: "2025-07-17" },
-  { title: "Inspeção Rua B", date: "2025-07-16" },
-  { title: "Inspeção Rua C", date: "2025-07-15" },
-  { title: "Inspeção Rua D", date: "2025-07-14" },
-]);
+const router = useRouter();
 
-const latestReadings = ref([
-  { value: 120, date: "2025-07-17" },
-  { value: 90, date: "2025-07-16" },
-  { value: 110, date: "2025-07-15" },
-  { value: 95, date: "2025-07-14" },
-]);
+const auth = useAuthStore();
+const inspectionStore = useInspectionStore();
+const readingStore = useReadingStore();
+const employeeStore = useEmployeeStore();
+const watermeterStore = useWatermeterStore();
 
-const latestWatermeters = ref([
-  { serial: "HDM-987654", installedAt: "2025-07-17" },
-  { serial: "HDM-123456", installedAt: "2025-07-16" },
-  { serial: "HDM-456789", installedAt: "2025-07-15" },
-  { serial: "HDM-321654", installedAt: "2025-07-14" },
-]);
+const latestInspections = ref([]);
 
-const employeeZones = ref([
-  "Zona Norte",
-  "Zona Centro",
-  "Zona Sul",
-  "Zona Leste",
-]);
+const latestReadings = ref([]);
+
+const latestWatermeters = ref([]);
+
+const employeeZones = ref([]);
+
+const fetchData = async () => {
+  try {
+    // busca de ultimas inspeçoes
+    const payload = {
+      employeeId: auth.user.employeeId,
+      limit: 3,
+    };
+    if (auth.user.userType === "Leitor") {
+      await inspectionStore.find(payload);
+    } else {
+      await inspectionStore.find();
+    }
+    latestInspections.value = inspectionStore.inspections;
+
+    // Busca de ultimas leituras
+    const payReading = {
+      userId: auth.user.sub,
+      limit: 4,
+    };
+    if (auth.user.userType === "Leitor") {
+      await readingStore.find(payReading);
+    } else {
+      await readingStore.find();
+    }
+    latestReadings.value = readingStore.readings;
+
+    
+    await employeeStore.findOne(auth.user.employeeId);
+    employeeZones.value = employeeStore.empployee.zones;
+
+    await watermeterStore.find();
+    latestWatermeters.value = watermeterStore.watermeters;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+function formatarData(dataISO) {
+  const data = new Date(dataISO);
+  return data.toLocaleString("pt-PT", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
+onMounted(fetchData);
 </script>
 
 <style scoped>

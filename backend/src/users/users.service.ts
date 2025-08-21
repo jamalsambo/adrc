@@ -25,16 +25,16 @@ export class UsersService {
 
     @InjectRepository(UserPermissionEntity)
     private readonly userPermissionRepo: Repository<UserPermissionEntity>,
-  ) {}
+  ) { }
   async create(createUserDto: CreateUserDto) {
     const user = this.userRepository.create(createUserDto);
     return await this.userRepository.save(user);
   }
 
-    async update(id: string,updateUserDto: UpdateUserDto) {
-      const user = await this.userRepository.findOne({where: {id: id}})
-      this.userRepository.merge(user, updateUserDto)
-      return await this.userRepository.save(user)
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const user = await this.userRepository.findOne({ where: { id: id } })
+    this.userRepository.merge(user, updateUserDto)
+    return await this.userRepository.save(user)
   }
 
 
@@ -77,7 +77,7 @@ export class UsersService {
     const newPermissions = permissionIds.map((id) =>
       this.userPermissionRepo.create({ userId, permissionId: id }),
     );
-    
+
     await this.userPermissionRepo.save(newPermissions);
   }
 

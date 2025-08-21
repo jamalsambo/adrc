@@ -167,6 +167,7 @@ function deleteConsumer(id) {
     cancel: true,
     persistent: true,
   }).onOk(() => {
+    customerStore.remove(id)
     customers.value = customers.value.filter((c) => c.id !== id);
   });
 }

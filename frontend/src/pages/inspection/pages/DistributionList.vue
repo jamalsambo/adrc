@@ -33,16 +33,6 @@
                     Zona: {{ h.zone?.name || 'N/A' }}
                   </div>
                 </q-item-section>
-
-                <q-item-section side>
-                  <q-btn
-                    color="primary"
-                    icon="visibility"
-                    label="Fazer Leitura"
-                    @click="goToReading(h.id)"
-                    dense
-                  />
-                </q-item-section>
               </q-item>
             </q-list>
 
@@ -71,11 +61,6 @@ const inspectionStore = useInspectionStore();
 // Simulação com dados reais do backend
 const { id } = route.params;
 const rawData = ref([]);
-
-
-function goToReading(h){
-  router.push(`/inspections/${id}/readings/watermeter/${h}`)
-}
 
 // Agrupador
 function groupByEmployee(data) {

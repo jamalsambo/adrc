@@ -7,13 +7,14 @@ import {
   Param,
   Delete,
   ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 import { InspectionsService } from './inspections.service';
 import { CreateInspectionDto } from './dto/create-inspection.dto';
 
 @Controller('inspections')
 export class InspectionsController {
-  constructor(private readonly inspectionsService: InspectionsService) {}
+  constructor(private readonly inspectionsService: InspectionsService) { }
 
   @Post()
   create(@Body() createInspectionDto: CreateInspectionDto) {
@@ -21,8 +22,11 @@ export class InspectionsController {
   }
 
   @Get()
-  findAll() {
-    return this.inspectionsService.findAll();
+  findAll(
+    @Query('employeeId') employeeId?: string,
+    @Query('limit') limit?: number,
+  ) {
+    return this.inspectionsService.findAll(employeeId, limit);
   }
 
   @Get('types')
@@ -36,8 +40,10 @@ export class InspectionsController {
   }
 
   @Get(':id')
-  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.inspectionsService.findOneOrFail({ id });
+  findOne(@Param('id', new ParseUUIDPipe()) id: string,
+    @Query('employeeId') employeeId?: string,
+  ) {
+    return this.inspectionsService.findOneOrFail({ id }, employeeId);
   }
 
   @Delete(':id')
