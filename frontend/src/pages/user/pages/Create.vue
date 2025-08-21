@@ -10,7 +10,7 @@
           <div class="row q-col-gutter-sm">
             <!-- Select Tipo -->
             <q-input
-              class="col-md-6 col-sm-12 col-xs-12"
+              class="col-md-4 col-sm-12 col-xs-12"
               label="Usuario"
               v-model="form.username"
               outlined
@@ -18,12 +18,25 @@
               dense
             />
             <q-input
-              class="col-md-6 col-sm-12 col-xs-12"
+              class="col-md-4 col-sm-12 col-xs-12"
               label="Numero de telefone"
               v-model="form.phone"
               outlined
               required
               dense
+            />
+            <q-select
+              class="col-md-4 col-sm-12 col-xs-12"
+              v-model="form.userTypeId"
+              label="Tipo de usuario"
+              filled
+              :options="userTypes"
+              :rules="[(val) => !!val || 'Obrigatório']"
+              dense
+              option-value="id"
+              option-label="name"
+              map-options
+              emit-value
             />
             <q-input
               class="col-md-6 col-sm-12 col-xs-12"
@@ -61,13 +74,7 @@
             </q-input>
           </div>
           <div class="row justify-end q-gutter-sm">
-            <q-btn
-              label="Guardar"
-              color="positive"
-              icon="save"
-              type="submit"
-              flat
-            />
+            <q-btn label="Guardar" color="positive" icon="save" type="submit" flat />
           </div>
         </q-form>
       </q-card-section>
@@ -99,9 +106,7 @@
             <q-item clickable v-ripple @click="toggleSelection(scope.opt)">
               <q-item-section>
                 <q-item-label>
-                  <strong v-if="scope.opt.isGroup">{{
-                    scope.opt.label
-                  }}</strong>
+                  <strong v-if="scope.opt.isGroup">{{ scope.opt.label }}</strong>
                   <span v-else>{{ scope.opt.label }}</span>
                 </q-item-label>
               </q-item-section>
@@ -114,13 +119,7 @@
         </q-select>
       </q-card-section>
       <q-card-actions vertical align="right">
-        <q-btn
-          label="Voltar"
-          color="negative"
-          icon="back"
-          @click="router.back()"
-          flat
-        />
+        <q-btn label="Voltar" color="negative" icon="back" @click="router.back()" flat />
       </q-card-actions>
     </q-card>
   </q-page>
@@ -143,9 +142,11 @@ const { notifyError, notifySuccess } = useNotify();
 const { userId } = route.params;
 const roles = ref([]);
 const selected = ref([]);
+const userTypes = ref([]);
 const form = ref({
   username: "",
   phone: "",
+  userTypeId: "",
   password: "",
   passwordConfirm: "",
 });
@@ -208,11 +209,15 @@ const fetchData = async () => {
 
     form.value.username = userStores.user.username;
     form.value.phone = userStores.user.phone;
+    form.value.userTypeId = userStores.user.userTypeId;
 
     await userStores.findRoles();
     roles.value = userStores.roles;
 
     selected.value = userStores?.user.permissions?.map((up) => up.key);
+
+    await userStores.findTypes();
+    userTypes.value = userStores.userTypes;
   } catch (error) {
     console.log(error);
   }

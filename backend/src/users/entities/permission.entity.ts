@@ -6,10 +6,12 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { RoleEntity } from './roles.entity';
 import { UserEntity } from './user.entity';
+import { UserPermissionEntity } from './has-permission.entity';
 
 @Entity('permissions')
 export class PermissionEntity {
@@ -32,4 +34,7 @@ export class PermissionEntity {
   @ManyToMany(() => UserEntity, (permission) => permission.permissions)
   @JoinTable()
   users: UserEntity[];
+
+  @OneToMany(() => UserPermissionEntity, userPermissions => userPermissions.permission)
+  userPermissions: UserPermissionEntity[]
 }

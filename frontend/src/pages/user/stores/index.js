@@ -5,6 +5,7 @@ export const useUserStore = defineStore("user", {
   state: () => ({
     user: {},
     roles: [],
+    userTypes: [],
   }),
   getters: {},
   actions: {
@@ -28,7 +29,7 @@ export const useUserStore = defineStore("user", {
     async findTypes() {
       const { data, error } = await api.get("/users/types");
       if (error) throw error;
-      this.users = data;
+      this.userTypes = data;
     },
     async findRoles() {
       const { data, error } = await api.get("/users/roles");

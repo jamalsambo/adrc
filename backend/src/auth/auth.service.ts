@@ -24,7 +24,6 @@ export class AuthService {
       displayName: user.displayName,
       delegationId: user.delegationId,
       userType: user.userType.name,
-      position: user.employee?.position?.name || 'Funcionario'
     };
     
     const permissions = await this.userService.findPermissions(user.id);

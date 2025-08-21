@@ -92,6 +92,7 @@ export class UsersService {
 
   async findPermissions(userId: string) {
     return this.userPermissionRepo.find({
+      relations: ['permission'],
       where: { userId: userId },
     });
   }
