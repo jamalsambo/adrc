@@ -31,6 +31,7 @@
                   <div class="text-caption text-grey">
                     Status: {{ h.status }} |
                     Zona: {{ h.zone?.name || 'N/A' }}
+                    Quarteirão: {{ h.block || 'N/A' }}
                   </div>
                 </q-item-section>
               </q-item>

@@ -4,7 +4,7 @@ import { CreateWatermeterDto } from './dto/create-watermeter.dto';
 import { UpdateWatermeterDto } from './dto/update-watermeter.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WatermeterEntity } from './entities/watermeter.entity';
-import { FindOneOptions, FindOptionsWhere, Repository } from 'typeorm';
+import { FindOneOptions, FindOptionsWhere, IsNull, Not, Repository } from 'typeorm';
 import { EmployeeHasZoneEntity } from 'src/employees/entities/has-zones.entity';
 import { InspectionHasWatermeter } from 'src/inspections/entities/has-watermeter.entity';
 
@@ -32,7 +32,7 @@ export class WatermetersService {
       },
     });
   }
-  
+
   async findOneOrFail(
     conditions: FindOptionsWhere<WatermeterEntity>,
     options?: FindOneOptions<WatermeterEntity>,
@@ -64,22 +64,31 @@ export class WatermetersService {
   }
 
   async distributeWatermetersToEmployees(inspectionId: string) {
-    // 1. Obter todos os watermeters com zona atribuída
-    const watermeters = await this.watermeterRespository.find();
+    const watermeters = await this.watermeterRespository.find({
+      where: {
+        zoneId: Not(IsNull()),
+        block: Not(IsNull()),
+      },
+    });
 
-    // 2. Agrupar watermeters por zona
-    const groupedByZone = new Map<string, any[]>();
+    // 2. Agrupar por zona e block
+    const groupedByZoneAndBlock = new Map<string, Map<any, any[]>>();
     for (const wm of watermeters) {
-      if (!groupedByZone.has(wm.zoneId)) {
-        groupedByZone.set(wm.zoneId, []);
+      if (!groupedByZoneAndBlock.has(wm.zoneId)) {
+        groupedByZoneAndBlock.set(wm.zoneId, new Map<string, any[]>());
       }
-      groupedByZone.get(wm.zoneId).push(wm);
+
+      const blockMap = groupedByZoneAndBlock.get(wm.zoneId);
+      if (!blockMap.has(wm.block)) {
+        blockMap.set(wm.block, []);
+      }
+      blockMap.get(wm.block).push(wm);
     }
 
     const assignments = [];
 
-    // 3. Para cada zona, buscar funcionários e distribuir watermeters
-    for (const [zoneId, zoneWatermeters] of groupedByZone.entries()) {
+    // 3. Para cada zona
+    for (const [zoneId, blockMap] of groupedByZoneAndBlock.entries()) {
       // Buscar funcionários da zona
       const employeesInZone = await this.employeeHasZoneRepo.find({
         where: { zoneId },
@@ -88,17 +97,21 @@ export class WatermetersService {
       const employeeIds = employeesInZone.map((e) => e.employeeId);
       if (employeeIds.length === 0) continue;
 
-      // Distribuir de forma equitativa
       let index = 0;
-      for (const wm of zoneWatermeters) {
+
+      // 4. Para cada block dentro da zona
+      for (const [blockId, blockWatermeters] of blockMap.entries()) {
+        // Escolher um funcionário para o block inteiro
         const employeeId = employeeIds[index % employeeIds.length];
 
-        assignments.push({
-          employeeId,
-          watermeterId: wm.id,
-          inspectionId,
-          inspection: false,
-        });
+        for (const wm of blockWatermeters) {
+          assignments.push({
+            employeeId,
+            watermeterId: wm.id,
+            inspectionId,
+            inspection: false,
+          });
+        }
 
         index++;
       }

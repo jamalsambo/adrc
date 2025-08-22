@@ -47,7 +47,7 @@
         <div
           v-for="(item, index) in latestReadings"
           :key="index"
-          class="col-md-3 col-sm-6 col-xs-12"
+          class="col-md-4 col-sm-6 col-xs-12"
         >
           <q-card>
             <q-card-section>
@@ -75,7 +75,7 @@
         <div
           v-for="(item, index) in latestWatermeters"
           :key="index"
-          class="col-md-3 col-sm-6 col-xs-12"
+          class="col-md-4 col-sm-6 col-xs-12"
         >
           <q-card>
             <q-card-section>
@@ -147,19 +147,19 @@ const fetchData = async () => {
     if (auth.user.userType === "Leitor") {
       await inspectionStore.find(payload);
     } else {
-      await inspectionStore.find();
+      await inspectionStore.find({ limit: 3});
     }
     latestInspections.value = inspectionStore.inspections;
 
     // Busca de ultimas leituras
     const payReading = {
       userId: auth.user.sub,
-      limit: 4,
+      limit: 3,
     };
     if (auth.user.userType === "Leitor") {
       await readingStore.find(payReading);
     } else {
-      await readingStore.find();
+      await readingStore.find({ limit: 3});
     }
     latestReadings.value = readingStore.readings;
 

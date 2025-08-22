@@ -24,6 +24,10 @@ export const useInspectionStore = defineStore('inspection', {
       if (error) throw error;
       this.inspection = data;
     },
+    async delete(id) {
+      const { error } = await api.delete(`/inspections/${id}`);
+      if (error) throw error;
+    },
     async find(params) {
       const { data, error } = await api.get("/inspections", {
         params: {

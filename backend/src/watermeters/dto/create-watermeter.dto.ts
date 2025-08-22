@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsUUID, IsString, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsUUID, IsString, IsOptional, IsNumber } from 'class-validator';
 
 export class CreateWatermeterDto {
   @IsNotEmpty()
@@ -28,6 +28,10 @@ export class CreateWatermeterDto {
   @IsOptional()
   @IsString()
   status?: string
+
+  @IsOptional()
+  @IsNumber()
+  block?: number
 
   @IsNotEmpty()
   @IsUUID()

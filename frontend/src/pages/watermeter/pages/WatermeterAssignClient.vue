@@ -26,6 +26,16 @@
           emit-value
           clearable
         />
+        <q-input
+          v-model="form.block"
+          label="Quarteirão"
+          filled
+          type="number"
+          :rules="[
+            (val) => !!val || 'Campo obrigatório',
+            (val) => /^\d+$/.test(val) || 'Apenas números',
+          ]"
+        />
 
         <map-picker
           :lat="form.lantitude"
@@ -111,6 +121,8 @@ const form = ref({
   lantitude: null,
   longitude: null,
   zoneId: "",
+  block: null,
+  status: "Activo"
 });
 const formAssociete = ref({
   customerId: "",
@@ -164,6 +176,7 @@ async function fetchData() {
     form.value.lantitude = watermeter.value?.lantitude;
     form.value.longitude = watermeter.value?.longitude;
     form.value.zoneId = watermeter.value?.zoneId;
+    form.value.block = watermeter.value.block
 
     const mostRecent = watermeter.value?.hasCustomers?.reduce((prev, curr) => {
       return new Date(prev?.createdAt) > new Date(curr?.createdAt) ? prev : curr;

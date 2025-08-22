@@ -22,7 +22,7 @@
             label="Fazer Leitura"
             icon="check_circle"
             color="positive"
-    
+            :disable="distance > 1"
             @click="submitReading"
           />
         </div>
@@ -32,7 +32,6 @@
 </template>
 
 <script setup>
-        // :disable="distance > 100 || !ready"
 import { ref, onMounted, nextTick } from "vue";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";

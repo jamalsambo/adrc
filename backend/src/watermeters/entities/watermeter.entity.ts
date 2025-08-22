@@ -37,6 +37,9 @@ export class WatermeterEntity {
   @Column({ type: 'varchar', nullable: true, default: 'Inactivo' })
   status?: string;
 
+  @Column({ type: 'integer', nullable: true })
+  block?: number;
+
   @CreateDateColumn({ name: 'createdAt' })
   createdAt: Date;
 

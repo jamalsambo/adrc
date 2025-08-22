@@ -15,13 +15,7 @@
           @click="createInspection"
           v-if="!$q.screen.lt.sm && auth.hasCreateInspection"
         />
-        <q-btn
-          icon="add"
-          round
-          color="primary"
-          @click="createInspection"
-          v-else
-        />
+        <q-btn icon="add" round color="primary" @click="createInspection" v-else />
       </q-toolbar>
 
       <!-- Filtros -->
@@ -75,7 +69,7 @@
               color="primary"
               @click="distributeListe(props.row)"
               title="Lista de Hidrometro"
-                 v-if="auth.hasViewDistribuiteWatermeter"
+              v-if="auth.hasViewDistribuiteWatermeter"
             />
             <q-btn
               flat
@@ -100,14 +94,15 @@ import { useRouter } from "vue-router";
 import { useAuthStore } from "src/pages/auth/store";
 import { useInspectionStore } from "../stores";
 import columns from "../components/InspectionColumns";
-
+import useNotify from "app/composables/UseNotify";
 
 /* Inicialização dos objetos do Vue Router */
-const auth = useAuthStore()
+const auth = useAuthStore();
 const router = useRouter();
 
 /* Inicialização das stores */
 const inspectionStore = useInspectionStore();
+const { notifyError, notifySuccess} = useNotify()
 
 /* Inicialização das variaveis */
 const inspections = ref([]);
@@ -119,12 +114,9 @@ const filteredInspections = computed(() => {
     const matchesSearch =
       filters.value.search === "" ||
       insp.client.toLowerCase().includes(filters.value.search.toLowerCase()) ||
-      insp.hydrometer
-        .toLowerCase()
-        .includes(filters.value.search.toLowerCase());
+      insp.hydrometer.toLowerCase().includes(filters.value.search.toLowerCase());
 
-    const matchesStatus =
-      !filters.value.status || insp.status === filters.value.status;
+    const matchesStatus = !filters.value.status || insp.status === filters.value.status;
     const matchesDate = !filters.value.date || insp.date === filters.value.date;
 
     return matchesSearch && matchesStatus && matchesDate;
@@ -140,16 +132,31 @@ function distributeWatermeter(insp) {
 }
 
 function distributeListe(insp) {
-  router.push(`/inspections/${insp.id}/distribute-watermeter-list`);
+  if (auth.user.userType === "Leitor") {
+    router.push(`inspections/${insp.id}/watermeters`);
+  } else {
+    router.push(`/inspections/${insp.id}/distribute-watermeter-list`);
+  }
 }
 
 function deleteInspection(id) {
-  inspections.value = inspections.value.filter((i) => i.id !== id);
+  try {
+    inspectionStore.delete(id);
+    inspections.value = inspections.value.filter((i) => i.id !== id);
+    notifySuccess("Inspeção deletada com sucesso")
+  } catch (error) {}
 }
 
 async function fetchData() {
   try {
-    await inspectionStore.find();
+    const payload = {
+      employeeId: auth.user.employeeId,
+    };
+    if (auth.user.userType === "Leitor") {
+      await inspectionStore.find(payload);
+    } else {
+      await inspectionStore.find();
+    }
     inspections.value = inspectionStore.inspections;
   } catch (error) {
     console.log(error);
