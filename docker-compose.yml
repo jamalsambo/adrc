@@ -9,6 +9,7 @@ services:
     volumes:
       - ./backend:/usr/src/app
       - /usr/src/app/node_modules
+      - ./backend/uploads:/usr/src/app/uploads
     ports:
       - "3001:3000"
     depends_on:

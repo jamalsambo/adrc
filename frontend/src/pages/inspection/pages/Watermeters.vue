@@ -22,12 +22,12 @@
               </div>
             </q-item-section>
 
-            <q-item-section side v-if="auth.user.userType==='Leitor'">
+            <q-item-section side v-if="auth.user.userType!=='Leitor'">
               <q-btn
                 color="primary"
                 icon="visibility"
                 label="Fazer Leitura"
-                @click="goToReading(h.id)"
+                @click="goToReading(h.watermeter.id)"
                 dense
               />
             </q-item-section>

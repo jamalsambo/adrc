@@ -100,6 +100,7 @@ export class ReadingsService {
           'r.id',
           'r.number',
           'r.reading',
+          'r.fotoUrl',
           'w.number',
           'c.fullName',
           't.name',

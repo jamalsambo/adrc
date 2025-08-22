@@ -15,6 +15,7 @@ import { AnomaliesModule } from './anomalies/anomalies.module';
 import { ReadingsModule } from './readings/readings.module';
 import { InspectionsModule } from './inspections/inspections.module';
 import { LocationsModule } from './locations/locations.module';
+import { UploadController } from './upload.controller';
 
 @Module({
   imports: [
@@ -34,7 +35,7 @@ import { LocationsModule } from './locations/locations.module';
     InspectionsModule,
     LocationsModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, UploadController],
   providers: [AppService],
 })
 export class AppModule {}

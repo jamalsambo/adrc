@@ -62,6 +62,8 @@
           <div><strong>Leitor:</strong></div>
           <div>{{ data?.reader?.displayName }}</div>
         </div>
+        <q-separator />
+           <img  :src="`http://localhost:3001/upload/${data?.fotoUrl}`" class="camera-preview q-mt-sm" />
       </q-card-section>
 
       <q-card-actions align="right">
@@ -102,5 +104,9 @@ q-card {
 }
 q-card-section > .row {
   padding: 6px 0;
+}
+.camera-preview {
+  width: 70%;
+  border-radius: 4px;
 }
 </style>

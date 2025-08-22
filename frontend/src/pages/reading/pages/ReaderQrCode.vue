@@ -11,9 +11,7 @@
             v-model="reading"
             label="Leitura (4 dígitos)"
             type="number"
-            :rules="[
-              (v) => (v && v.toString().length === 4) || 'Insira 4 dígitos',
-            ]"
+            :rules="[(v) => (v && v.toString().length === 4) || 'Insira 4 dígitos']"
             dense
             outlined
           />
@@ -59,11 +57,7 @@
             style="display: none"
           />
 
-          <img
-            v-if="previewPhoto"
-            :src="previewPhoto"
-            class="camera-preview q-mt-sm"
-          />
+          <img v-if="previewPhoto" :src="previewPhoto" class="camera-preview q-mt-sm" />
 
           <q-btn
             type="submit"
@@ -79,6 +73,7 @@
 </template>
 
 <script setup>
+import axios from "axios";
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { Html5Qrcode } from "html5-qrcode";
 import { useQuasar } from "quasar";
@@ -97,7 +92,7 @@ const anomalyStore = useAnomalyStore();
 const { notifyError, notifySuccess, notifyInfo } = useNotify();
 
 const watermeterId = ref(route.params.id);
-const {inspectionId} = route.params
+const { inspectionId } = route.params;
 const cameraInput = ref(null);
 const dadosQr = ref(null);
 const reading = ref("");
@@ -106,8 +101,8 @@ const typeReading = ref(null);
 const anomaly = ref(null);
 const previewPhoto = ref("");
 const fotoFile = ref(null);
+const fotoUrl = ref(null);
 const anomalies = ref([]);
-const $q = useQuasar();
 let leitor = null;
 
 // iniciar leitor de QR
@@ -120,14 +115,13 @@ onMounted(async () => {
       try {
         const obj = JSON.parse(decodedText);
         if (obj.watermeterId === watermeterId.value) {
-          console.log(obj)
-          dadosQr.value = obj
-        }else {
+          dadosQr.value = obj;
+        } else {
           notifyError("QR inválido");
           leitor = new Html5Qrcode("reader");
-        } 
+        }
       } catch {
-        notifyError("QR inválido");
+        notifyError("Ocorreu um erro");
       }
       leitor.stop();
     },
@@ -148,11 +142,23 @@ const formValido = computed(() => {
 });
 
 // captura de foto → preview e arquivo
-function onPhotoCaptured(e) {
+async function onPhotoCaptured(e) {
   const file = e.target.files[0];
   if (!file) return;
   fotoFile.value = file;
+  const formData = new FormData();
+  formData.append("file", file);
   previewPhoto.value = URL.createObjectURL(file);
+
+  try {
+    const { data } = await axios.post("http://localhost:3001/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    fotoUrl.value = data.filename;
+  } catch (error) {
+    notifyError("Erro ao carregar a foto");
+  }
 }
 
 // dispara input de foto
@@ -176,31 +182,30 @@ async function fetchData() {
 async function submitForm() {
   try {
     if (dadosQr.value.watermeterId === watermeterId.value) {
-    const payload = {
-      reading: parseInt(reading.value),
-      fotoUrl: fotoFile.value.name,
-      delegationId: auth.user.delegationId,
-      watermeterId: watermeterId.value,
-      customerId: dadosQr.value.customerId,
-      typeReadingId: typeReading.value.id,
-      inspectionId: inspectionId,
-      ...(typeReading.value.name === "Anomalia" && anomaly.value?.id
-        ? { anomalyId: anomaly.value.id }
-        : {}),
-      userId: auth.user.sub,
-    };
+      const payload = {
+        reading: parseInt(reading.value),
+        fotoUrl: fotoFile.value.name,
+        delegationId: auth.user.delegationId,
+        watermeterId: watermeterId.value,
+        customerId: dadosQr.value.customerId,
+        typeReadingId: typeReading.value.id,
+        inspectionId: inspectionId,
+        ...(typeReading.value.name === "Anomalia" && anomaly.value?.id
+          ? { anomalyId: anomaly.value.id }
+          : {}),
+        userId: auth.user.sub,
+        fotoUrl: fotoUrl.value,
+      };
 
-    await readingStore.create(payload);
-    notifySuccess("Leitura lançada com sucesso!");
-     leitor.stop();
+      await readingStore.create(payload);
+      notifySuccess("Leitura lançada com sucesso!");
+      router.push(`/readings/${readingStore.reading.id}`);
+      leitor.stop();
     } else {
-      notifyError("Dados invalidos")
+      notifyError("Dados invalidos");
+      router.push(`inspections/${inspectionId}/watermeters`);
     }
-
-  } catch (error) {
-    notifyError("Erro ao registar leitura");
-  }
-  router.push(`/inspections/${inspectionId}/distribute-watermeter-list`);
+  } catch (error) {}
 }
 
 onBeforeRouteUpdate((to) => {
