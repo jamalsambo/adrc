@@ -23,32 +23,31 @@ export class InspectionsService {
   async findAll(employeeId?: string, limit?: number) {
     const qb = this.inspectionRepo
       .createQueryBuilder('inspection')
-      .leftJoin('inspection.hasWatermeters', 'hasWatermeters')
-      .orderBy('inspection.createdAt', 'DESC'); // 🔹 mais recentes primeiro
+      .leftJoin('inspection.hasWatermeters', 'hw')
+      .select('inspection.id', 'id')
+      .addSelect('inspection.number', 'number')
+      .addSelect('inspection.month', 'month')
+      .addSelect('inspection.createdAt', 'createdAt')
+      .addSelect('COUNT(hw.*)', 'totalWatermeters')
+      .addSelect(`SUM(CASE WHEN hw.inspection = true THEN 1 ELSE 0 END)`, 'inspected')
+      .addSelect(`SUM(CASE WHEN hw.inspection = false THEN 1 ELSE 0 END)`, 'notInspected')
+      .groupBy('inspection.id')
+      .addGroupBy('inspection.number')
+      .orderBy('inspection.createdAt', 'DESC');
 
+    // Filtra por employeeId, se passado
     if (employeeId) {
-      // 🔹 Caso tenha employeeId → filtra e conta só desse funcionário
-      qb.where('hasWatermeters.employeeId = :employeeId', { employeeId })
-        .loadRelationCountAndMap(
-          'inspection.watermetersCount',
-          'inspection.hasWatermeters',
-          'wm',
-          qb => qb.where('wm.employeeId = :employeeId', { employeeId })
-        );
-    } else {
-      // 🔹 Caso não tenha employeeId → traz todos e conta geral
-      qb.loadRelationCountAndMap(
-        'inspection.watermetersCount',
-        'inspection.hasWatermeters'
-      );
+      qb.andWhere('hw.employeeId = :employeeId', { employeeId });
     }
 
+    // Limita resultados, se passado
     if (limit) {
-      qb.take(limit); // 🔹 limita a quantidade de registros
+      qb.limit(limit);
     }
 
-    return qb.getMany();
+    return await qb.getRawMany();
   }
+
 
   async generateInspectionNumber(): Promise<string> {
     const last = await this.inspectionRepo
@@ -83,9 +82,9 @@ export class InspectionsService {
     return this.inspectionRepo.save(inspection);
   }
 
-async findOneOrFail(
+  async findOneOrFail(
   conditions: FindOptionsWhere<InspectionEntity>,
-  employeeId?: string, // 🔹 novo parâmetro opcional
+  employeeId?: string,
   options?: FindOneOptions<InspectionEntity>,
 ) {
   try {
@@ -94,7 +93,14 @@ async findOneOrFail(
       .leftJoinAndSelect('inspection.hasWatermeters', 'hasWatermeters')
       .leftJoinAndSelect('hasWatermeters.watermeter', 'watermeter')
       .leftJoinAndSelect('watermeter.zone', 'zone')
-      .leftJoinAndSelect('hasWatermeters.employee', 'employee');
+      .leftJoinAndSelect('hasWatermeters.employee', 'employee')
+      // 🔹 Adiciona readings filtrando pelo inspection atual
+           .leftJoinAndMapOne(
+        'watermeter.reading', // aqui será um objeto único
+        'watermeter.readings',
+        'reading',
+        'reading.inspectionId = inspection.id'
+      );
 
     // 🔹 Adiciona condições gerais
     Object.keys(conditions).forEach((key, index) => {
@@ -112,7 +118,6 @@ async findOneOrFail(
           qb => qb.where('wm.employeeId = :employeeId', { employeeId })
         );
     } else {
-      // 🔹 Caso não tenha employeeId → conta todos
       qb.loadRelationCountAndMap(
         'inspection.watermetersCount',
         'inspection.hasWatermeters'
@@ -139,6 +144,7 @@ async findOneOrFail(
 }
 
 
+
   async remove(id: string): Promise<void> {
     await this.inspectionRepo.delete(id);
   }
@@ -152,6 +158,12 @@ async findOneOrFail(
       where: { inspectionId: inspectionId },
       relations: ['watermeter', 'watermeter.zone', 'employee']
     });
+  }
+
+  async updatedInspWatermeter(inspectionId: string, watermeterId: string, inspection: boolean) {
+    const inspWatermeter = await this.inspeHasWatermeterRepo.findOneBy({ inspectionId, watermeterId })
+    this.inspeHasWatermeterRepo.merge(inspWatermeter, { inspection: inspection })
+    return await this.inspeHasWatermeterRepo.save(inspWatermeter)
   }
 
 }

@@ -6,6 +6,7 @@ export const useReadingStore = defineStore("reading", {
     readings: [],
     reading: {},
     types: [],
+    fotoURL: '',
   }),
   getters: {},
   actions: {
@@ -25,6 +26,11 @@ export const useReadingStore = defineStore("reading", {
       const { data, error } = await api.get(`/readings/${id}`);
       if (error) throw error;
       this.reading = data;
+    },
+     async getFotoURL(id) {
+      const { data, error } = await api.get(`/upload/${id}`);
+      if (error) throw error;
+      this.fotoURL = data;
     },
     async findTypes() {
       const { data, error } = await api.get("/readings/types");

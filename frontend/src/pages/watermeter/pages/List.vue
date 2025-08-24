@@ -2,10 +2,12 @@
   <q-page class="q-pa-md">
     <q-card flat bordered class="q-pa-sm">
       <q-toolbar class="bg-grey-2">
-        <q-toolbar-title>
-          <q-icon name="speed" class="q-mr-sm" />
-          Lista de Hidrômetros
-        </q-toolbar-title>
+        <q-toolbar class="bg-grey-2">
+          <q-toolbar-title class="flex items-center">
+            <q-icon name="speed" size="sm" class="q-mr-sm hidden-xs" />
+            <span class="text-body1 text-md-h6">Lista de Hidrômetros</span>
+          </q-toolbar-title>
+        </q-toolbar>
 
         <q-space />
         <q-btn
@@ -16,14 +18,7 @@
           class="q-mr-sm"
           v-if="!$q.screen.lt.sm && auth.hasCreateWatermeter"
         />
-        <q-btn
-          color="primary"
-          icon="add"
-          round
-          dense
-          @click="addHydrometer"
-          v-else
-        >
+        <q-btn color="primary" icon="add" round dense @click="addHydrometer" v-else>
           <q-tooltip>Adicionar</q-tooltip>
         </q-btn>
       </q-toolbar>
@@ -102,7 +97,7 @@
               color="purple"
               @click="viewReadings(props.row)"
               title="Leituras"
-               v-if="auth.hasViewWatermeterReading"
+              v-if="auth.hasViewWatermeterReading"
             />
           </q-td>
         </template>
@@ -110,15 +105,11 @@
 
       <!-- Cards mobile -->
       <div v-else class="q-mt-md">
-        <q-card
-          v-for="hyd in filteredHydrometers"
-          :key="hyd.id"
-          class="q-mb-sm"
-        >
+        <q-card v-for="hyd in paginatedHidrometros" :key="hyd.id" class="q-mb-sm">
           <q-card-section>
-            <div class="text-h6">Nº Série: {{ hyd.serial }}</div>
-            <div class="text-caption">Instalado em: {{ hyd.installDate }}</div>
-            <div class="text-caption">Estado: {{ hyd.status }}</div>
+            <div class="text-h6">Nº Série: {{ hyd.number }}</div>
+            <div class="text-caption">Zona de Instalação: {{ hyd.zone?.name }}</div>
+            <div class="text-caption">Quarteirão: {{ hyd.block }}</div>
           </q-card-section>
           <q-separator />
           <q-card-actions align="right">
@@ -128,14 +119,14 @@
               color="primary"
               @click="editHydrometer(hyd)"
               title="Editar"
-               v-if="auth.hasEditWatermeter"
+              v-if="auth.hasEditWatermeter"
             />
             <q-btn
               flat
               icon="delete"
               color="negative"
               @click="deleteHydrometer(hyd.id)"
-                v-if="auth.hasDeleteWatermeter"
+              v-if="auth.hasDeleteWatermeter"
             />
             <q-btn
               dense
@@ -143,7 +134,7 @@
               flat
               icon="link"
               color="teal"
-              @click="associateClient(hyd.id)"
+              @click="associateClient(hyd)"
               v-if="auth.hasAssignWatermeterCustomer"
             />
             <q-btn
@@ -152,13 +143,27 @@
               flat
               icon="bar_chart"
               color="purple"
-              @click="viewReadings(hyd.id)"
+              @click="viewReadings(hyd)"
               v-if="auth.hasViewWatermeterReading"
             />
           </q-card-actions>
         </q-card>
+
+        <div class="q-mt-md flex flex-center">
+          <q-pagination
+            v-model="currentPage"
+            :max="totalPages"
+            color="primary"
+            boundary-numbers
+            :max-pages="7"
+          />
+        </div>
       </div>
+      <q-footer bordered class="bg-grey-2 text-right q-pa-sm">
+        <q-btn color="primary" icon="arrow_back" label="Voltar" @click="router.push('/')"/>
+      </q-footer> 
     </q-card>
+    
   </q-page>
 </template>
 
@@ -169,14 +174,16 @@ import { useQuasar } from "quasar";
 import { useWatermeterStore } from "../stores";
 import columns from "../components/WatermeterColumns";
 import { useAuthStore } from "src/pages/auth/store";
+import useNotify from "app/composables/UseNotify";
 
 const $q = useQuasar();
 /* Inicialização dos objetos do Vue Router */
-const auth = useAuthStore()
+const auth = useAuthStore();
 const router = useRouter();
 
 /* Inicialização das stores */
 const watermeterStore = useWatermeterStore();
+const { notifyError, notifySuccess } = useNotify();
 
 /* Inicialização das variaveis */
 const watermeters = ref([]);
@@ -185,6 +192,8 @@ const filters = ref({
   status: "",
 });
 const statusOptions = ["Activo", "Inactivo"];
+const currentPage = ref(1); // página atual
+const rowsPerPage = ref(5); // quantos registros por página
 
 /* Funcao e filtro da tabela Hidrometros */
 const filteredHydrometers = computed(() => {
@@ -192,10 +201,20 @@ const filteredHydrometers = computed(() => {
     const matchesSearch =
       filters.value.search === "" ||
       h.number.toLowerCase().includes(filters.value.search.toLowerCase());
-    const matchesStatus =
-      !filters.value.status || h.status === filters.value.status;
+    const matchesStatus = !filters.value.status || h.status === filters.value.status;
     return matchesSearch && matchesStatus;
   });
+});
+
+const totalPages = computed(() =>
+  Math.ceil(filteredHydrometers.value.length / rowsPerPage.value)
+);
+
+// registros a mostrar na página atual
+const paginatedHidrometros = computed(() => {
+  const start = (currentPage.value - 1) * rowsPerPage.value;
+  const end = start + rowsPerPage.value;
+  return filteredHydrometers.value.slice(start, end);
 });
 
 /* Funcao para navegacao a pagina de adicao do hidrometro */
@@ -214,9 +233,8 @@ function associateClient(h) {
 }
 
 /* Funcoa para navegacao a para de leituras do hidrometro */
-function viewReadings (h) {
+function viewReadings(h) {
   router.push(`/watermeters/${h.id}/readings`);
-
 }
 
 /* Funcao para editar Hidrometro */
@@ -226,8 +244,10 @@ function deleteHydrometer(id) {
     message: "Deseja remover este hidrômetro?",
     cancel: true,
     persistent: true,
-  }).onOk(() => {
+  }).onOk(async () => {
+    await watermeterStore.delete(id);
     watermeters.value = watermeters.value.filter((h) => h.id !== id);
+    notifySuccess("Hidrometro deletado com sucesso");
   });
 }
 

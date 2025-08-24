@@ -13,20 +13,26 @@
         <!-- Mapa -->
         <div id="map" style="height: 400px" class="q-mb-md"></div>
 
-        <div class="row items-center q-mt-md">
-          <q-badge outline color="primary" class="q-mr-sm">
-            Distância: {{ distance.toFixed(2) }} m
-          </q-badge>
+        <div class="row items-center q-gutter-sm q-mt-md">
+          <q-badge outline color="primary"> Distância: {{ distance }} m </q-badge>
 
           <q-btn
             label="Fazer Leitura"
             icon="check_circle"
             color="positive"
-            :disable="distance > 1"
+          
             @click="submitReading"
           />
         </div>
       </q-card-section>
+      <q-footer bordered class="bg-grey-2 text-right q-pa-sm">
+        <q-btn
+          color="primary"
+          icon="arrow_back"
+          label="Voltar"
+          @click="router.push('/')"
+        />
+      </q-footer>
     </q-card>
   </q-page>
 </template>
@@ -56,22 +62,9 @@ const ready = ref(false);
 let map = null;
 let routeControl = null;
 
-// Calcula a distância entre dois pontos usando fórmula de Haversine
-function haversine(lat1, lon1, lat2, lon2) {
-  const R = 6371000;
-  const toRad = (deg) => deg * (Math.PI / 180);
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
+const time = ref(0); // tempo em segundos
 
-// Inicializa o mapa e todos os elementos visuais
 async function initMap() {
-  // Garante que o DOM da div#map já esteja montado
   await nextTick();
 
   map = L.map("map", {
@@ -90,7 +83,7 @@ async function initMap() {
     .bindPopup("📍 Hidrômetro")
     .openPopup();
 
-  // Dentro da função initMap()
+  // Controle de rota
   routeControl = L.Routing.control({
     waypoints: [],
     createMarker: () => null,
@@ -103,12 +96,18 @@ async function initMap() {
     },
   }).addTo(map);
 
+  // Captura a distância e tempo da rota
+  routeControl.on("routesfound", function (e) {
+    const summary = e.routes[0].summary;
+    distance.value = summary.totalDistance; // metros
+    time.value = summary.totalTime; // segundos
+  });
+
   // Rastreia localização em tempo real
   navigator.geolocation.watchPosition(
     (pos) => {
       const lat = pos.coords.latitude;
       const lon = pos.coords.longitude;
-      console.log(lon);
       userLocation.value = { lat, lon };
       ready.value = true;
 
@@ -126,28 +125,14 @@ async function initMap() {
         map.userMarker.setLatLng([lat, lon]);
       }
 
-      // Atualiza rota traçada pelas ruas
+      // Atualiza rota
       routeControl.setWaypoints([
         L.latLng(lat, lon),
         L.latLng(hydrometer.value.lantitude, hydrometer.value.longitude),
       ]);
-
-      // Atualiza a distância em metros
-      distance.value = haversine(
-        lat,
-        lon,
-        hydrometer.value.lantitude,
-        hydrometer.value.longitude
-      );
     },
-    (err) => {
-      console.error("Erro ao obter localização:", err);
-    },
-    {
-      enableHighAccuracy: true,
-      maximumAge: 1000,
-      timeout: 10000,
-    }
+    (err) => console.error("Erro ao obter localização:", err),
+    { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
   );
 }
 

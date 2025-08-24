@@ -73,17 +73,20 @@
       <!-- Cards Mobile -->
       <div v-else class="q-mt-md">
         <q-card
-          v-for="reading in filteredReadings"
+          v-for="reading in paginatedReadings"
           :key="reading.id"
           class="q-mb-sm"
         >
           <q-card-section>
-            <div class="text-h6">{{ reading.name }}</div>
+            <div class="text-h6">{{ reading.number }}</div>
             <div class="text-subtitle2 text-grey">
-              Tipo: {{ reading.type }}
+              Cliente: {{ reading.customer.fullName }}
             </div>
             <div class="text-caption">
-              Status: {{ reading.status }} | Região: {{ reading.region }}
+              Leitura: {{ reading.reading }} | Hidrômetro: {{ reading.watermeter.number }}
+            </div>
+            <div class="text-caption">
+              Tipo: {{ reading.type.name }}
             </div>
           </q-card-section>
           <q-separator />
@@ -92,12 +95,24 @@
               flat
               icon="visibility"
               color="negative"
-              @click="viewReading(reading.id)"
+              @click="viewReading(reading)"
             />
           </q-card-actions>
         </q-card>
+        <div class="q-mt-md flex flex-center">
+          <q-pagination
+            v-model="currentPage"
+            :max="totalPages"
+            color="primary"
+            boundary-numbers
+            :max-pages="7"
+          />
+        </div>
       </div>
     </q-card>
+     <q-footer bordered class="bg-grey-2 text-right q-pa-sm">
+        <q-btn color="primary" icon="arrow_back" label="Voltar" @click="router.back()" />
+      </q-footer>
   </q-page>
 </template>
 
@@ -118,6 +133,8 @@ const readingStore = useReadingStore();
 
 // Dados de exemplo
 const readings = ref([]);
+const currentPage = ref(1); // página atual
+const rowsPerPage = ref(5); // quantos registros por página
 
 // Filtros múltiplos
 const filters = ref({
@@ -136,6 +153,17 @@ const filteredReadings = computed(() => {
 
     return matchesSearch;
   });
+});
+
+const totalPages = computed(() =>
+  Math.ceil(filteredReadings.value.length / rowsPerPage.value)
+);
+
+// registros a mostrar na página atual
+const paginatedReadings = computed(() => {
+  const start = (currentPage.value - 1) * rowsPerPage.value;
+  const end = start + rowsPerPage.value;
+  return filteredReadings.value.slice(start, end);
 });
 
 function viewReading(r) {

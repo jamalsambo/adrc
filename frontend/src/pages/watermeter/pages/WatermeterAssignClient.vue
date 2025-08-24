@@ -75,18 +75,15 @@
 
         <div class="row justify-end q-gutter-sm">
           <q-btn
-            flat
-            label="Cancelar"
-            color="grey"
-            @click="router.push('/watermeters')"
-          />
-          <q-btn
             :label="dados?.customerId ? 'Dissassociar' : 'Associar'"
             color="primary"
             type="submit"
           />
         </div>
       </q-form>
+       <q-footer bordered class="bg-grey-2 text-right q-pa-sm">
+        <q-btn color="primary" icon="arrow_back" label="Voltar" @click="router.push('/watermeters')"/>
+      </q-footer> 
     </q-card>
   </q-page>
 </template>
@@ -121,7 +118,7 @@ const form = ref({
   lantitude: null,
   longitude: null,
   zoneId: "",
-  block: null,
+  block: 1,
   status: "Activo"
 });
 const formAssociete = ref({
@@ -141,6 +138,7 @@ async function submitAssociation() {
       await customerStore.addWatermeter(formAssociete.value);
       await watermeterStore.update(route.params.id, {
         ...form.value,
+        block: parseInt(form.value.block),
         updatedBy: auth.user.sub,
       });
       notifySuccess("Hidrometro associado com sucesso");

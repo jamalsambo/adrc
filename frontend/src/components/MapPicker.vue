@@ -49,7 +49,7 @@ function getCurrentLocation() {
       },
       {
         enableHighAccuracy: true,   // 🔍 Prioriza GPS ou Wi-Fi (melhor precisão)
-        timeout: 10000,             // Espera até 10s
+        timeout: 5000,             // Espera até 10s
         maximumAge: 0               // Não usa cache
       }
     )

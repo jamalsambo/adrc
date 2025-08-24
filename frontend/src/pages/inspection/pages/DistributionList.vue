@@ -2,13 +2,18 @@
   <q-page class="q-pa-md">
     <q-card flat bordered>
       <q-toolbar class="bg-grey-2">
-        <q-toolbar-title>
-          <q-icon name="list" class="q-mr-sm" />
-          Distribuições de Hidrômetros por Funcionário
+        <!-- Título -->
+        <q-toolbar-title class="flex items-center">
+          <q-icon name="list" class="q-mr-sm hidden-xs" />
+          <!-- Esconde ícone só em mobile (xs) -->
+          <span class="text-subtitle1 text-weight-bold">
+            <!-- Texto adaptado: menor em mobile -->
+            <span v-if="$q.screen.gt.xs" class="hidden-xs"
+              >Distribuições de Hidrômetros por Funcionário</span
+            >
+            <span v-else class="block-xs">Distribuições - Funcionário</span>
+          </span>
         </q-toolbar-title>
-
-        <q-space />
-        <q-btn icon="add" label="Nova Distribuição" color="primary" @click="router.push('/distribuicoes/nova')" />
       </q-toolbar>
 
       <q-card-section class="q-gutter-md">
@@ -29,9 +34,8 @@
                 <q-item-section>
                   <div class="text-bold">Hidrômetro: {{ h.number }}</div>
                   <div class="text-caption text-grey">
-                    Status: {{ h.status }} |
-                    Zona: {{ h.zone?.name || 'N/A' }}
-                    Quarteirão: {{ h.block || 'N/A' }}
+                    Status: {{ h.status }} | Zona: {{ h.zone?.name || "N/A" }} Quarteirão:
+                    {{ h.block || "N/A" }}
                   </div>
                 </q-item-section>
               </q-item>
@@ -45,6 +49,10 @@
           <q-separator spaced inset />
         </div>
       </q-card-section>
+      <!-- Botão fixo em baixo -->
+      <q-footer bordered class="bg-grey-2 text-right q-pa-sm">
+        <q-btn color="primary" icon="arrow_back" label="Voltar" @click="router.back()" />
+      </q-footer>
     </q-card>
   </q-page>
 </template>
@@ -89,7 +97,7 @@ const groupedDistributions = computed(() => groupByEmployee(rawData.value));
 async function fetchData() {
   try {
     await inspectionStore.findWatermeter(id);
-    rawData.value = inspectionStore.watermeters
+    rawData.value = inspectionStore.watermeters;
   } catch (error) {
     console.log(error);
   }

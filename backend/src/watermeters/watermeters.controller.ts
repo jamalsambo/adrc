@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, UseGuards, Query } from '@nestjs/common';
 import { WatermetersService } from './watermeters.service';
 import { CreateWatermeterDto } from './dto/create-watermeter.dto';
 import { UpdateWatermeterDto } from './dto/update-watermeter.dto';
@@ -17,8 +17,10 @@ export class WatermetersController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.watermetersService.findAll();
+  findAll(
+    @Query('limit')  limit: number
+  ) {
+    return this.watermetersService.findAll(limit);
   }
 
   @Post('distribute/:inspectionId')

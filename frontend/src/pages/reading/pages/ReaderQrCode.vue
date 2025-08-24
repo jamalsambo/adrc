@@ -68,6 +68,14 @@
           />
         </q-form>
       </div>
+      <q-footer bordered class="bg-grey-2 text-right q-pa-sm">
+        <q-btn
+          color="primary"
+          icon="arrow_back"
+          label="Voltar"
+          @click="router.back('/')"
+        />
+      </q-footer>
     </q-card>
   </q-page>
 </template>
@@ -82,6 +90,7 @@ import { useReadingStore } from "../stores";
 import { useAnomalyStore } from "src/pages/anomaly/stores";
 import { onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
 import useNotify from "app/composables/UseNotify";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const route = useRoute();
 const router = useRouter();
@@ -151,11 +160,14 @@ async function onPhotoCaptured(e) {
   previewPhoto.value = URL.createObjectURL(file);
 
   try {
-    const { data } = await axios.post("http://localhost:3001/upload", formData, {
+    const API_URL = import.meta.env.VITE_API_URL;
+
+    const { data } = await axios.post(`${API_URL}/upload`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
 
     fotoUrl.value = data.filename;
+    notifyInfo("Foto carregada")
   } catch (error) {
     notifyError("Erro ao carregar a foto");
   }

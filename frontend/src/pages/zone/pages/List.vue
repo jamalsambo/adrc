@@ -2,10 +2,12 @@
   <q-page class="q-pa-md">
     <q-card flat bordered class="q-pa-sm">
       <q-toolbar class="bg-grey-2">
-        <q-toolbar-title>
-          <q-icon name="speed" class="q-mr-sm" />
-          Lista de Zonas
-        </q-toolbar-title>
+        <q-toolbar class="bg-grey-2">
+          <q-toolbar-title class="flex items-center">
+            <q-icon name="speed" size="sm" class="q-mr-sm hidden-xs" />
+            <span class="text-body1 text-md-h6"> Lista de Zonas</span>
+          </q-toolbar-title>
+        </q-toolbar>
 
         <q-space />
         <q-btn
@@ -25,7 +27,7 @@
       <div class="row q-gutter-sm q-mt-sm items-center">
         <q-input
           v-model="filters.search"
-          label="Pesquisar por nº de série"
+          label="Pesquisar por nome"
           dense
           filled
           class="col-12 col-md-4"
@@ -40,7 +42,7 @@
         class="q-mt-md"
         flat
         bordered
-        :rows="filteredAnomaly"
+        :rows="filteredZones"
         :columns="columns"
         row-key="id"
         wrap-cells
@@ -53,7 +55,7 @@
               flat
               icon="edit"
               color="primary"
-              @click="editHydrometer(props.row)"
+              @click="editZone(props.row)"
               title="Editar"
             />
             <q-btn
@@ -62,7 +64,7 @@
               flat
               icon="delete"
               color="negative"
-              @click="deleteHydrometer(props.row.id)"
+              @click="deleteZone(props.row.id)"
               title="Deletar"
             />
           </q-td>
@@ -71,31 +73,20 @@
 
       <!-- Cards mobile -->
       <div v-else class="q-mt-md">
-        <q-card v-for="hyd in filteredAnomaly" :key="hyd.id" class="q-mb-sm">
+        <q-card v-for="z in filteredZones" :key="z.id" class="q-mb-sm">
           <q-card-section>
-            <div class="text-h6">Nº Série: {{ hyd.serial }}</div>
-            <div class="text-caption">Instalado em: {{ hyd.installDate }}</div>
-            <div class="text-caption">Estado: {{ hyd.status }}</div>
+            <div class="text-h6">{{ z.name }}</div>
           </q-card-section>
           <q-separator />
           <q-card-actions align="right">
-            <q-btn
-              flat
-              icon="edit"
-              color="primary"
-              @click="editHydrometer(hyd)"
-              title="Editar"
-            />
-            <q-btn
-              flat
-              icon="delete"
-              color="negative"
-              @click="deleteHydrometer(hyd.id)"
-            />
+            <q-btn flat icon="delete" color="negative" @click="deleteZone(z.id)" />
           </q-card-actions>
         </q-card>
       </div>
     </q-card>
+    <q-footer bordered class="bg-grey-2 text-right q-pa-sm">
+      <q-btn color="primary" icon="arrow_back" label="Voltar" @click="router.push('/')" />
+    </q-footer>
   </q-page>
 </template>
 
@@ -120,28 +111,17 @@ const filters = ref({
 });
 
 /* Funcao e filtro da tabela Hidrometros */
-const filteredAnomaly = computed(() => {
+const filteredZones = computed(() => {
   return zones.value.filter((h) => {
     const matchesSearch =
       filters.value.search === "" ||
       h.name.toLowerCase().includes(filters.value.search.toLowerCase());
-
     return matchesSearch;
   });
 });
 
-/* Funcao para navegacao a pagina de adicao do anomalia */
-function addHydrometer() {
-  router.push("/anomalies/new");
-}
-
-/* Funcao para navegacaoa a pagina de edicao do anomalia */
-function editHydrometer(a) {
-  router.push(`/anomalies/${a.id}/edit`);
-}
-
 /* Funcao para editar anomalia */
-function deleteHydrometer(id) {
+function deleteZone(id) {
   $q.dialog({
     title: "Confirmar",
     message: "Deseja remover esta anomalia?",

@@ -6,6 +6,7 @@ import { ReadingEntity } from './entities/reading.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { TypeReadingsEntity } from './entities/type.entity';
+import { InspectionsService } from 'src/inspections/inspections.service';
 
 @Injectable()
 export class ReadingsService {
@@ -15,6 +16,9 @@ export class ReadingsService {
 
     @InjectRepository(TypeReadingsEntity)
     private readonly typeReadingRepo: Repository<TypeReadingsEntity>,
+
+    private readonly inspectionsService: InspectionsService
+    
   ) { }
 
   async generateReadingNumber(): Promise<string> {
@@ -36,16 +40,22 @@ export class ReadingsService {
     return `RD-${padded}`;
   }
 
-  async create(createReadingDto: CreateReadingDto) {
-    const number = await this.generateReadingNumber();
+async create(createReadingDto: CreateReadingDto) {
+  const number = await this.generateReadingNumber();
 
-    const reading = this.readingRepo.create({
-      ...createReadingDto,
-      number,
-    });
+  const reading = this.readingRepo.create({
+    ...createReadingDto,
+    number,
+  });
 
-    return this.readingRepo.save(reading);
-  }
+  const savedReading = await this.readingRepo.save(reading);
+
+  // Atualizar outra tabela (exemplo: watermeter)
+  await this.inspectionsService.updatedInspWatermeter( createReadingDto.inspectionId, createReadingDto.watermeterId, true);
+
+  return savedReading;
+}
+
 
   async findAll(userId?: string, limit?: number) {
     const qb = this.readingRepo

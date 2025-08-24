@@ -1,12 +1,15 @@
 <template>
   <q-page class="q-pa-md">
     <q-card flat bordered class="q-pa-lg q-mx-auto" style="max-width: 800px">
-      <q-card-section>
-        <div class="text-h6">
-          <q-icon name="supervisor_account" class="q-mr-sm" />
-          Alocar Zonas ao Funcionário
-        </div>
-      </q-card-section>
+<q-card-section>
+  <div class="flex items-center">
+    <q-icon name="supervisor_account" class="q-mr-sm" size="sm" />
+    <span class="text-subtitle1 text-md-h6 text-lg-h5">
+      Alocar Zonas ao Funcionário
+    </span>
+  </div>
+</q-card-section>
+
 
       <q-form @submit.prevent="assignZones" class="q-gutter-md">
         <q-select
@@ -24,7 +27,6 @@
         />
 
         <div class="row justify-end q-gutter-sm">
-          <q-btn flat label="Cancelar" @click="router.push('/funcionarios')" />
           <q-btn label="Alocar" type="submit" color="primary" />
         </div>
       </q-form>
@@ -34,7 +36,7 @@
       <q-card-section>
         <div class="text-subtitle1 q-mb-sm">
           <q-icon name="map" class="q-mr-sm" />
-          Zonas já alocadas ao Funcionário
+          Zonas alocadas
         </div>
 
         <q-list bordered separator v-if="assignedZones.length">
@@ -47,6 +49,9 @@
           Nenhuma zona alocada ainda.
         </div>
       </q-card-section>
+      <q-footer bordered class="bg-grey-2 text-right q-pa-sm">
+        <q-btn color="primary" icon="arrow_back" label="Voltar" @click="router.back('/')" />
+      </q-footer> 
     </q-card>
   </q-page>
 </template>
@@ -57,6 +62,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useComposablesStores } from "app/composables";
 import { useEmployeeStore } from "../stores";
 import { useAuthStore } from "src/pages/auth/store";
+
 
 const router = useRouter();
 const route = useRoute();

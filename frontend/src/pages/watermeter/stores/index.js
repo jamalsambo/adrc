@@ -22,8 +22,8 @@ export const useWatermeterStore = defineStore("watermeter", {
       if (error) throw error;
       this.watermeter = data;
     },
-    async find() {
-      const { data, error } = await api.get("/watermeters");
+    async find(params) {
+      const { data, error } = await api.get("/watermeters", {params: {...params}});
       if (error) throw error;
       this.watermeters = data;
     },

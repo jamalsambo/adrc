@@ -24,9 +24,10 @@ export class WatermetersService {
     return await this.watermeterRespository.save(createWatermeterDto);
   }
 
-  async findAll() {
+  async findAll(limit?: number) {
     return await this.watermeterRespository.find({
       relations: ['zone', 'hasCustomers'],
+      take: limit,
       order: {
         createdAt: 'DESC', // 🔹 do mais recente para o mais antigo
       },
@@ -40,7 +41,7 @@ export class WatermetersService {
     try {
       const user = await this.watermeterRespository.findOneOrFail({
         where: conditions,
-        relations: ['zone', 'hasCustomers', 'hasCustomers.customer'],
+        relations: ['zone', 'hasCustomers', 'hasCustomers.customer', 'readings'],
         ...options,
       });
 

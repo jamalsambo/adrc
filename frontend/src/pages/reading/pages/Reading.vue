@@ -63,20 +63,22 @@
           <div>{{ data?.reader?.displayName }}</div>
         </div>
         <q-separator />
-           <img  :src="`http://localhost:3001/upload/${data?.fotoUrl}`" class="camera-preview q-mt-sm" />
+           <img  :src="`${api}/upload/${data?.fotoUrl}`" class="camera-preview q-mt-sm" />
       </q-card-section>
 
-      <q-card-actions align="right">
-        <q-btn label="Fechar" color="primary" flat @click="router.back()" />
-      </q-card-actions>
     </q-card>
+     <q-footer bordered class="bg-grey-2 text-right q-pa-sm">
+        <q-btn color="primary" icon="arrow_back" label="Voltar" @click="router.push('/readings')" />
+      </q-footer>
   </q-page>
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useReadingStore } from "../stores";
 import { useRoute, useRouter } from "vue-router";
+import { api } from "src/boot/axios";
+
 
 const route = useRoute();
 const router = useRouter();
@@ -92,6 +94,7 @@ async function fetchData() {
     data.value = readingStore.reading;
   } catch (error) {}
 }
+
 onMounted(async () => {
   await fetchData();
 });

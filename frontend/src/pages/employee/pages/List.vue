@@ -28,9 +28,7 @@
             @click="addEmployee"
             v-else
           >
-            <q-tooltip anchor="top middle" self="bottom middle"
-              >Adicionar</q-tooltip
-            >
+            <q-tooltip anchor="top middle" self="bottom middle">Adicionar</q-tooltip>
           </q-btn>
 
           <!-- Campo de Pesquisa -->
@@ -80,7 +78,7 @@
                 size="sm"
                 class="q-ml-xs"
                 @click="deleteEmployee(props.row.id)"
-                 v-if="auth.hasDeleteEmployee"
+                v-if="auth.hasDeleteEmployee"
               />
               <q-btn
                 dense
@@ -108,37 +106,49 @@
 
       <!-- Mobile: cards -->
       <div v-else class="q-mt-sm">
-        <q-card v-for="emp in filteredEmployees" :key="emp.id" class="q-mb-sm">
+        <q-card v-for="emp in paginatedEmployees" :key="emp.id" class="q-mb-sm">
           <q-card-section>
             <div class="text-h6">{{ emp.fullName }}</div>
-            <div class="text-subtitle2 text-grey">
-              Cargo: {{ emp.dateBirth }}
-            </div>
+            <div class="text-subtitle2 text-grey">Numero: {{ emp.number }}</div>
             <div class="text-caption text-grey">Email: {{ emp.gender }}</div>
           </q-card-section>
 
           <q-separator />
           <q-card-actions align="right">
+            <q-btn flat icon="edit" color="primary" @click="editEmployee(emp)" />
+            <q-btn flat icon="delete" color="negative" @click="deleteEmployee(emp.id)" />
             <q-btn
-              flat
-              icon="edit"
-              color="primary"
-              @click="editEmployee(emp)"
-            />
-            <q-btn
-              flat
-              icon="delete"
-              color="negative"
-              @click="deleteEmployee(emp.id)"
-            />
-            <q-btn
+              dense
+              round
               flat
               icon="edit_location"
+              size="sm"
+              @click="assignedZones(emp)"
+              v-if="auth.hasAssignZoneEmployee"
+            />
+            <q-btn
+              flat
+              dense
+              round
+              icon="manage_accounts"
+              @click="addUser(emp)"
               color="primary"
-              @click="editEmployee(emp)"
+              title="Configurar Acesso"
+              v-if="auth.hasCreateUser"
             />
           </q-card-actions>
         </q-card>
+
+        <!-- Paginação -->
+        <div class="q-mt-md flex flex-center">
+          <q-pagination
+            v-model="currentPage"
+            :max="totalPages"
+            color="primary"
+            boundary-numbers
+            :max-pages="7"
+          />
+        </div>
       </div>
     </q-card>
   </q-page>
@@ -157,14 +167,16 @@ import useNotify from "app/composables/UseNotify";
 const router = useRouter();
 
 /* Inicialização das stores */
-const auth = useAuthStore()
+const auth = useAuthStore();
 const employeeStores = useEmployeeStore();
-const userStores = useUserStore()
+const userStores = useUserStore();
 const { notifySuccess, notifyError } = useNotify();
 
 /* Inicialização das variaveis  */
 const search = ref("");
 const employees = ref([]);
+const currentPage = ref(1); // página atual
+const rowsPerPage = ref(5); // quantos registros por página
 
 /* Funcao e filtro da tabela funcionario */
 const filteredEmployees = computed(() => {
@@ -177,6 +189,17 @@ const filteredEmployees = computed(() => {
   );
 });
 
+const totalPages = computed(() =>
+  Math.ceil(filteredEmployees.value.length / rowsPerPage.value)
+);
+
+// registros a mostrar na página atual
+const paginatedEmployees = computed(() => {
+  const start = (currentPage.value - 1) * rowsPerPage.value;
+  const end = start + rowsPerPage.value;
+  return filteredEmployees.value.slice(start, end);
+});
+
 /* Funcao para navegacaoa a pagina de edicao do funcionario */
 function editEmployee(emp) {
   router.push({ name: "employee-edit", params: { id: emp.id } });
@@ -185,11 +208,11 @@ function editEmployee(emp) {
 /* Funcoa para deletar funcionario */
 async function deleteEmployee(id) {
   try {
-    await employeeStores.remove(id)
+    await employeeStores.remove(id);
     employees.value = employees.value.filter((emp) => emp.id !== id);
-    notifySuccess("Usuario deletado com sucesso")
+    notifySuccess("Usuario deletado com sucesso");
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
 }
 
@@ -203,27 +226,30 @@ function assignedZones(e) {
   router.push({ name: "employee-assign-zones", params: { id: e.id } });
 }
 
-async function addUser (employee) {
+async function addUser(employee) {
   if (employee.userId) {
-     router.push({
+    router.push({
       name: "manage-account",
       params: { userId: employee.userId },
     });
   } else {
-   await userStores.create({
-        displayName: employee.fullName,
-        username: 'N/A',
-        password: '123456',
-        phone: 'N/A',
-        delegationId: employee?.delegationId
-   })
-   await employeeStores.update(employee.id, {userId: userStores.user.id, updatedBy: auth.user.sub})
+    await userStores.create({
+      displayName: employee.fullName,
+      username: "N/A",
+      password: "123456",
+      phone: "N/A",
+      delegationId: employee?.delegationId,
+    });
+    await employeeStores.update(employee.id, {
+      userId: userStores.user.id,
+      updatedBy: auth.user.sub,
+    });
     router.push({
       name: "manage-account",
       params: { userId: userStores.user.id },
     });
   }
-};
+}
 
 /* Logica de inicializacao da pagina (Carrega os funcionarios) */
 onMounted(async () => {

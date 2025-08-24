@@ -83,18 +83,14 @@
       <!-- Cards Mobile -->
       <div v-else class="q-mt-md">
         <q-card
-          v-for="customer in filteredConsumers"
+          v-for="customer in paginateCustomers"
           :key="customer.id"
           class="q-mb-sm"
         >
           <q-card-section>
-            <div class="text-h6">{{ customer.name }}</div>
-            <div class="text-subtitle2 text-grey">
-              Tipo: {{ consumer.type }}
-            </div>
-            <div class="text-caption">
-              Status: {{ customer.status }} | Região: {{ customer.region }}
-            </div>
+            <div class="text-h6">{{ customer.fullName }}</div>
+            <div class="text-subtitle2 text-grey">Numero: {{ customer.number }}</div>
+            <div class="text-caption text-grey">Genero: {{ customer.gender }}</div>
           </q-card-section>
           <q-separator />
           <q-card-actions align="right">
@@ -112,6 +108,16 @@
             />
           </q-card-actions>
         </q-card>
+
+        <div class="q-mt-md flex flex-center">
+          <q-pagination
+            v-model="currentPage"
+            :max="totalPages"
+            color="primary"
+            boundary-numbers
+            :max-pages="7"
+          />
+        </div>
       </div>
     </q-card>
   </q-page>
@@ -137,6 +143,8 @@ const customerStore = useCustomerStore();
 
 // Dados de exemplo
 const customers = ref([]);
+const currentPage = ref(1); // página atual
+const rowsPerPage = ref(5); // quantos registros por página
 
 // Filtros múltiplos
 const filters = ref({
@@ -156,6 +164,18 @@ const filteredConsumers = computed(() => {
     return matchesSearch;
   });
 });
+
+const totalPages = computed(() =>
+  Math.ceil(filteredConsumers.value.length / rowsPerPage.value)
+);
+
+// registros a mostrar na página atual
+const paginateCustomers = computed(() => {
+  const start = (currentPage.value - 1) * rowsPerPage.value;
+  const end = start + rowsPerPage.value;
+  return filteredConsumers.value.slice(start, end);
+});
+
 
 function addConsumer() {
   router.push("/customers/new");
