@@ -101,7 +101,7 @@
             <q-card-section>
               <div class="text-h6">Inspeção #{{ insp.number }}</div>
               <div class="text-subtitle2 text-grey">Mes: {{ insp.month }}</div>
-              <div class="text-caption">Tipo: {{ insp.type?.name }}</div>
+              <div class="text-caption">Tipo: {{ insp?.type }}</div>
             </q-card-section>
 
             <q-separator />
@@ -139,15 +139,15 @@
               />
             </q-card-actions>
           </q-card>
-                  <div class="q-mt-md flex flex-center">
-          <q-pagination
-            v-model="currentPage"
-            :max="totalPages"
-            color="primary"
-            boundary-numbers
-            :max-pages="7"
-          />
-        </div>
+          <div class="q-mt-md flex flex-center">
+            <q-pagination
+              v-model="currentPage"
+              :max="totalPages"
+              color="primary"
+              boundary-numbers
+              :max-pages="7"
+            />
+          </div>
         </div>
       </div>
       <q-footer bordered class="bg-grey-2 text-right q-pa-sm">

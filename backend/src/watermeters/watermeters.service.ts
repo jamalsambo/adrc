@@ -69,6 +69,7 @@ export class WatermetersService {
       where: {
         zoneId: Not(IsNull()),
         block: Not(IsNull()),
+        status: 'Activo'
       },
     });
 

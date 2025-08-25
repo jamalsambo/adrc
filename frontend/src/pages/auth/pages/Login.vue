@@ -38,7 +38,7 @@
               />
 
               <div>
-               <q-btn label="Login" type="submit" color="primary" />
+               <q-btn label="Entrar" type="submit" color="primary" />
               </div>
             </q-form>
           </q-card-section>

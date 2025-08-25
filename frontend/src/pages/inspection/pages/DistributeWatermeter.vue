@@ -47,11 +47,19 @@
             flat
             label="Cancelar"
             color="grey"
-            @click="router.push('/distribuicoes')"
+            @click="router.back()"
           />
           <q-btn label="Distribuir" type="submit" color="primary" />
         </div>
       </q-form>
+      <q-footer bordered class="bg-grey-2 text-right q-pa-sm">
+        <q-btn
+          color="primary"
+          icon="arrow_back"
+          label="Voltar"
+          @click="router.push('/')"
+        />
+      </q-footer>
     </q-card>
   </q-page>
 </template>

@@ -46,30 +46,36 @@
           class="row items-center justify-between"
         >
           <div><strong>Anomalia:</strong></div>
-          <div>{{ data?.anomaly?.name || "N/A" }} ({{ data?.anomaly?.code || "N/A"  }})</div>
+          <div>
+            {{ data?.anomaly?.name || "N/A" }} ({{ data?.anomaly?.code || "N/A" }})
+          </div>
         </div>
 
         <q-separator />
 
         <div class="row items-center justify-between">
           <div><strong>Inspeção:</strong></div>
-          <div>{{ data?.inspection?.number  || "N/A" }}</div>
+          <div>{{ data?.inspection?.number || "N/A" }}</div>
         </div>
 
-          <q-separator />
+        <q-separator />
 
         <div class="row items-center justify-between">
           <div><strong>Leitor:</strong></div>
           <div>{{ data?.reader?.displayName }}</div>
         </div>
         <q-separator />
-           <img  :src="`${api}/upload/${data?.fotoUrl}`" class="camera-preview q-mt-sm" />
+        <img :src="`${API_URL}/upload/${data?.fotoUrl}`" class="camera-preview q-mt-sm"   />
       </q-card-section>
-
     </q-card>
-     <q-footer bordered class="bg-grey-2 text-right q-pa-sm">
-        <q-btn color="primary" icon="arrow_back" label="Voltar" @click="router.push('/readings')" />
-      </q-footer>
+    <q-footer bordered class="bg-grey-2 text-right q-pa-sm">
+      <q-btn
+        color="primary"
+        icon="arrow_back"
+        label="Voltar"
+        @click="router.push('/readings')"
+      />
+    </q-footer>
   </q-page>
 </template>
 
@@ -77,8 +83,7 @@
 import { onMounted, ref } from "vue";
 import { useReadingStore } from "../stores";
 import { useRoute, useRouter } from "vue-router";
-import { api } from "src/boot/axios";
-
+const API_URL = import.meta.env.VITE_API_URL;
 
 const route = useRoute();
 const router = useRouter();
@@ -92,9 +97,14 @@ async function fetchData() {
   try {
     await readingStore.findOne(id);
     data.value = readingStore.reading;
+    
   } catch (error) {}
 }
-
+function openImage(url) {
+  if (url) {
+    window.open(url, "_blank"); // abre em nova aba
+  }
+}
 onMounted(async () => {
   await fetchData();
 });

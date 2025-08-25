@@ -24,16 +24,20 @@ export class InspectionsService {
     const qb = this.inspectionRepo
       .createQueryBuilder('inspection')
       .leftJoin('inspection.hasWatermeters', 'hw')
+      .leftJoin('inspection.type', 'type') // 🔹 join na relação type
       .select('inspection.id', 'id')
       .addSelect('inspection.number', 'number')
       .addSelect('inspection.month', 'month')
+      .addSelect('type.name', 'type') // 🔹 seleciona o campo desejado da relação
       .addSelect('inspection.createdAt', 'createdAt')
       .addSelect('COUNT(hw.*)', 'totalWatermeters')
       .addSelect(`SUM(CASE WHEN hw.inspection = true THEN 1 ELSE 0 END)`, 'inspected')
       .addSelect(`SUM(CASE WHEN hw.inspection = false THEN 1 ELSE 0 END)`, 'notInspected')
       .groupBy('inspection.id')
       .addGroupBy('inspection.number')
+      .addGroupBy('type.name') // 🔹 agrupa também pelo campo da relação
       .orderBy('inspection.createdAt', 'DESC');
+
 
     // Filtra por employeeId, se passado
     if (employeeId) {
@@ -83,65 +87,65 @@ export class InspectionsService {
   }
 
   async findOneOrFail(
-  conditions: FindOptionsWhere<InspectionEntity>,
-  employeeId?: string,
-  options?: FindOneOptions<InspectionEntity>,
-) {
-  try {
-    const qb = this.inspectionRepo
-      .createQueryBuilder('inspection')
-      .leftJoinAndSelect('inspection.hasWatermeters', 'hasWatermeters')
-      .leftJoinAndSelect('hasWatermeters.watermeter', 'watermeter')
-      .leftJoinAndSelect('watermeter.zone', 'zone')
-      .leftJoinAndSelect('hasWatermeters.employee', 'employee')
-      // 🔹 Adiciona readings filtrando pelo inspection atual
-           .leftJoinAndMapOne(
-        'watermeter.reading', // aqui será um objeto único
-        'watermeter.readings',
-        'reading',
-        'reading.inspectionId = inspection.id'
-      );
-
-    // 🔹 Adiciona condições gerais
-    Object.keys(conditions).forEach((key, index) => {
-      const paramName = `param${index}`;
-      qb.andWhere(`inspection.${key} = :${paramName}`, { [paramName]: (conditions as any)[key] });
-    });
-
-    // 🔹 Filtra por employeeId se fornecido
-    if (employeeId) {
-      qb.andWhere('hasWatermeters.employeeId = :employeeId', { employeeId })
-        .loadRelationCountAndMap(
-          'inspection.watermetersCount',
-          'inspection.hasWatermeters',
-          'wm',
-          qb => qb.where('wm.employeeId = :employeeId', { employeeId })
+    conditions: FindOptionsWhere<InspectionEntity>,
+    employeeId?: string,
+    options?: FindOneOptions<InspectionEntity>,
+  ) {
+    try {
+      const qb = this.inspectionRepo
+        .createQueryBuilder('inspection')
+        .leftJoinAndSelect('inspection.hasWatermeters', 'hasWatermeters')
+        .leftJoinAndSelect('hasWatermeters.watermeter', 'watermeter')
+        .leftJoinAndSelect('watermeter.zone', 'zone')
+        .leftJoinAndSelect('hasWatermeters.employee', 'employee')
+        // 🔹 Adiciona readings filtrando pelo inspection atual
+        .leftJoinAndMapOne(
+          'watermeter.reading', // aqui será um objeto único
+          'watermeter.readings',
+          'reading',
+          'reading.inspectionId = inspection.id'
         );
-    } else {
-      qb.loadRelationCountAndMap(
-        'inspection.watermetersCount',
-        'inspection.hasWatermeters'
-      );
-    }
 
-    // 🔹 Aplica opções extras como order
-    if (options?.order) {
-      Object.entries(options.order).forEach(([field, direction]) => {
-        qb.addOrderBy(`inspection.${field}`, direction as 'ASC' | 'DESC');
+      // 🔹 Adiciona condições gerais
+      Object.keys(conditions).forEach((key, index) => {
+        const paramName = `param${index}`;
+        qb.andWhere(`inspection.${key} = :${paramName}`, { [paramName]: (conditions as any)[key] });
       });
-    }
 
-    const inspection = await qb.getOne();
+      // 🔹 Filtra por employeeId se fornecido
+      if (employeeId) {
+        qb.andWhere('hasWatermeters.employeeId = :employeeId', { employeeId })
+          .loadRelationCountAndMap(
+            'inspection.watermetersCount',
+            'inspection.hasWatermeters',
+            'wm',
+            qb => qb.where('wm.employeeId = :employeeId', { employeeId })
+          );
+      } else {
+        qb.loadRelationCountAndMap(
+          'inspection.watermetersCount',
+          'inspection.hasWatermeters'
+        );
+      }
 
-    if (!inspection) {
+      // 🔹 Aplica opções extras como order
+      if (options?.order) {
+        Object.entries(options.order).forEach(([field, direction]) => {
+          qb.addOrderBy(`inspection.${field}`, direction as 'ASC' | 'DESC');
+        });
+      }
+
+      const inspection = await qb.getOne();
+
+      if (!inspection) {
+        throw new NotFoundException('Inspeção não encontrada');
+      }
+
+      return inspection;
+    } catch (error) {
       throw new NotFoundException('Inspeção não encontrada');
     }
-
-    return inspection;
-  } catch (error) {
-    throw new NotFoundException('Inspeção não encontrada');
   }
-}
 
 
 

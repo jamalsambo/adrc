@@ -20,7 +20,7 @@
             label="Fazer Leitura"
             icon="check_circle"
             color="positive"
-          
+           
             @click="submitReading"
           />
         </div>
